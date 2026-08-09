@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>മഴ അലേർട്ട് | Kerala Rain Alert — ജില്ല തിരിച്ചുള്ള മഴ മുന്നറിയിപ്പ്</title>
+<meta name="description" content="കേരളത്തിലെ 14 ജില്ലകളിലെ തത്സമയ മഴ അലേർട്ട് നില (പച്ച/മഞ്ഞ/ഓറഞ്ച്/റെഡ്), സ്കൂൾ അവധി വിവരങ്ങൾ, ജില്ലാ കളക്ടർ വിവരങ്ങൾ എന്നിവ ഒറ്റ നോട്ടത്തിൽ അറിയാം.">
+<meta name="theme-color" content="#0B1614">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manjari:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --bg:        #0B1614;
+  --surface:   #12211F;
+  --surface-2: #182D2A;
+  --ink:       #EDF3EF;
+  --muted:     #8FA69E;
+  --faint:     #5C7069;
+  --brass:     #C9A227;
+  --brass-dim: #8A701F;
+  --line:      rgba(237,243,239,0.09);
+  --line-2:    rgba(237,243,239,0.16);
+
+  --lvl-green:  #3F8F5F;
+  --lvl-yellow: #E4B73B;
+  --lvl-orange: #DC7A33;
+  --lvl-red:    #C2453C;
+
+  --shadow: 0 24px 60px -20px rgba(0,0,0,0.6);
+  --ease: cubic-bezier(.22,.68,.32,1);
+}
+
+*{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html,body{ height:100%; }
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 18% -10%, #16302B 0%, transparent 55%),
+    radial-gradient(circle at 100% 0%, #12241F 0%, transparent 45%),
+    var(--bg);
+  color:var(--ink);
+  font-family:'Manjari',system-ui,sans-serif;
+  font-weight:700;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+h1,h2,h3{ font-family:'Manjari',sans-serif; font-weight:700; margin:0; }
+.mono{ font-family:'Manjari',sans-serif; font-weight:700; }
+button{ font-family:inherit; font-weight:700; }
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+.app{
+  max-width:520px;
+  margin:0 auto;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+@media (min-width:560px){
+  body{ padding:28px 16px; }
+  .app{
+    min-height:calc(100dvh - 56px);
+    border-radius:28px;
+    box-shadow:var(--shadow);
+    background:linear-gradient(180deg,#0D1A18,#0A1412);
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+}
+
+/* ---- header ---- */
+.header{
+  position:relative;
+  padding:22px 22px 16px;
+  border-bottom:1px solid var(--line);
+  overflow:hidden;
+}
+.rain{
+  position:absolute; inset:0;
+  background-image:repeating-linear-gradient(
+    112deg,
+    rgba(201,162,39,0.10) 0px, rgba(201,162,39,0.10) 1px,
+    transparent 1px, transparent 34px
+  );
+  background-size:200% 200%;
+  animation:rainfall 9s linear infinite;
+  opacity:0.5;
+  pointer-events:none;
+}
+@keyframes rainfall{
+  0%{ background-position:0 0; }
+  100%{ background-position:-160px 320px; }
+}
+.header h1{
+  position:relative;
+  font-size:27px; font-weight:600; letter-spacing:-0.01em;
+}
+.header-row{ position:relative; display:flex; align-items:center; justify-content:center; }
+.subline{
+  position:relative;
+  margin-top:6px;
+  font-size:13px; color:var(--muted);
+  text-align:center;
+}
+.updated-line{
+  position:relative;
+  margin-top:3px;
+  font-size:11px; color:var(--faint);
+  letter-spacing:.04em;
+  text-align:center;
+}
+
+/* ---- map ---- */
+.map-wrap{
+  flex:1;
+  display:flex;
+  align-items:flex-start;
+  justify-content:center;
+  padding:6px 0 10px;
+  position:relative;
+}
+.map-wrap::before{
+  content:"";
+  position:absolute; inset:8px 0;
+  background:radial-gradient(ellipse at 50% 40%, rgba(201,162,39,0.06), transparent 65%);
+  pointer-events:none;
+}
+svg.map{
+  width:100%;
+  height:auto;
+  display:block;
+  overflow:visible;
+}
+.district-label{
+  font-family:'Manjari',sans-serif;
+  font-weight:700;
+  fill:#FFFFFF;
+  paint-order:stroke fill;
+  stroke:rgba(6,14,12,0.65);
+  stroke-width:3.2px;
+  stroke-linejoin:round;
+  text-anchor:middle;
+  dominant-baseline:central;
+  pointer-events:none;
+}
+.district{
+  stroke:rgba(11,22,20,0.55);
+  stroke-width:2px;
+  cursor:pointer;
+  transition:filter .15s var(--ease), transform .15s var(--ease), stroke .15s var(--ease);
+  transform-box:fill-box;
+  transform-origin:center;
+  outline:none;
+}
+.district:hover{ filter:brightness(1.14); }
+.district:focus-visible{ stroke:var(--ink); stroke-width:3px; }
+.district.is-active{
+  filter:brightness(1.22);
+  stroke:var(--brass);
+  stroke-width:3px;
+  transform:scale(1.012);
+}
+.district.lvl-green{  fill:var(--lvl-green); }
+.district.lvl-yellow{ fill:var(--lvl-yellow); }
+.district.lvl-orange{ fill:var(--lvl-orange); }
+.district.lvl-red{    fill:var(--lvl-red); }
+
+.district.lvl-red{ animation:pulse-red 2.6s ease-in-out infinite; }
+@keyframes pulse-red{
+  0%,100%{ filter:brightness(1) drop-shadow(0 0 0 rgba(194,69,60,0)); }
+  50%{ filter:brightness(1.16) drop-shadow(0 0 10px rgba(194,69,60,0.55)); }
+}
+
+/* ============================================================
+   SHEET
+   ============================================================ */
+.backdrop{
+  position:fixed; inset:0;
+  background:rgba(5,10,9,0.6);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .28s var(--ease);
+  z-index:40;
+}
+.backdrop.show{ opacity:1; pointer-events:auto; }
+
+.sheet{
+  position:fixed;
+  left:0; right:0; bottom:0;
+  max-width:520px;
+  margin:0 auto;
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));
+  border:1px solid var(--line-2);
+  border-bottom:none;
+  border-radius:24px 24px 0 0;
+  box-shadow:var(--shadow);
+  transform:translateY(102%);
+  transition:transform .34s var(--ease);
+  z-index:41;
+  max-height:88dvh;
+  display:flex; flex-direction:column;
+  padding-bottom:env(safe-area-inset-bottom,0);
+}
+.sheet.show{ transform:translateY(0); }
+
+.sheet-handle{
+  display:flex; justify-content:center; padding:10px 0 4px;
+  cursor:grab;
+  touch-action:none;
+}
+.sheet-handle span{ width:38px; height:4px; border-radius:3px; background:var(--line-2); }
+
+.sheet-body{ overflow-y:auto; padding:6px 22px 26px; }
+
+.sheet-ribbon{
+  display:flex; align-items:center; gap:6px;
+  font-family:'Manjari',sans-serif;
+  font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+  padding:6px 10px; border-radius:100px;
+  width:fit-content;
+}
+.sheet-ribbon i{ width:7px;height:7px;border-radius:50%; }
+
+.sheet-head{
+  display:flex; align-items:flex-end; gap:14px;
+  margin-top:16px; margin-bottom:6px;
+}
+.mini-shape-wrap{
+  width:58px; height:74px; flex:none;
+  display:flex; align-items:center; justify-content:center;
+}
+svg.mini-shape{ width:100%; height:100%; }
+.sheet-head h2{ font-size:24px; font-weight:600; line-height:1.05; }
+.sheet-head .district-sub{ font-size:12px; color:var(--muted); margin-top:3px; }
+
+.sheet-msg{
+  margin-top:14px;
+  font-size:13.5px; line-height:1.55; color:#CBD8D3;
+  padding:12px 14px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--line);
+  border-radius:12px;
+}
+
+.rows{ margin-top:16px; display:flex; flex-direction:column; }
+.row{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 0;
+  border-top:1px solid var(--line);
+}
+.row .ico{
+  width:34px; height:34px; border-radius:10px; flex:none;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(255,255,255,0.04);
+  border:1px solid var(--line);
+}
+.row .ico svg{ width:16px; height:16px; }
+.row .txt{ min-width:0; flex:1; }
+.row .label{ font-size:11px; letter-spacing:.02em; color:var(--faint); font-family:'Manjari',sans-serif; font-weight:700; }
+.row .value{ font-size:14.5px; margin-top:2px; color:var(--ink); }
+.row .value.empty{ color:var(--faint); font-style:italic; }
+.row a.value{ color:var(--brass); text-decoration:none; }
+.row a.value:hover{ text-decoration:underline; }
+
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:12.5px; padding:4px 10px; border-radius:100px;
+  border:1px solid var(--line-2);
+}
+.chip.on{ background:rgba(194,69,60,0.16); border-color:rgba(194,69,60,0.4); color:#F1B2AC; }
+.chip.off{ background:rgba(255,255,255,0.03); color:var(--muted); }
+
+.sheet-close{
+  position:absolute; top:14px; right:16px;
+  width:32px; height:32px; border-radius:50%;
+  border:1px solid var(--line-2);
+  background:rgba(255,255,255,0.03);
+  color:var(--muted);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+}
+.sheet{ position:fixed; }
+.sheet-close svg{ width:14px; height:14px; }
+
+/* ---- edit panel (admin mode) ---- */
+.edit-panel{
+  margin-top:16px;
+  padding:14px;
+  border:1px dashed var(--line-2);
+  border-radius:14px;
+  background:rgba(201,162,39,0.05);
+}
+.edit-panel .edit-label{
+  font-size:11px; color:var(--brass); letter-spacing:.03em;
+  margin-bottom:9px;
+}
+.level-picker{ display:flex; gap:7px; flex-wrap:wrap; }
+.level-chip{
+  flex:1; min-width:64px;
+  display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:9px 6px; border-radius:10px;
+  border:1.5px solid var(--line-2);
+  background:rgba(255,255,255,0.03);
+  color:var(--muted);
+  font-size:11.5px; cursor:pointer;
+}
+.level-chip i{ width:8px; height:8px; border-radius:50%; flex:none; }
+.level-chip.selected{ color:var(--ink); border-color:currentColor; background:rgba(255,255,255,0.06); }
+.school-toggle-row{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-top:14px;
+}
+.school-toggle-row span{ font-size:13px; color:var(--ink); }
+.switch{
+  position:relative; width:44px; height:26px; flex:none;
+  border-radius:100px; border:1px solid var(--line-2);
+  background:rgba(255,255,255,0.06);
+  cursor:pointer;
+}
+.switch em{
+  position:absolute; top:2px; left:2px; width:20px; height:20px;
+  border-radius:50%; background:var(--muted);
+  transition:transform .18s var(--ease), background .18s var(--ease);
+  font-style:normal;
+}
+.switch.on{ background:rgba(194,69,60,0.25); border-color:rgba(194,69,60,0.5); }
+.switch.on em{ transform:translateX(18px); background:var(--lvl-red); }
+
+/* ---- bottom ad bar ---- */
+.ad-bottom{
+  flex:none;
+  margin:8px 16px 6px;
+  padding:10px;
+  border:1px solid var(--line-2);
+  border-radius:16px;
+  background:rgba(255,255,255,0.025);
+  position:relative;
+}
+.ad-bottom .ad-tag{
+  position:absolute; top:-9px; left:12px;
+  font-size:9.5px; padding:2px 8px; border-radius:100px;
+  background:var(--bg); border:1px solid var(--line-2);
+  color:var(--faint); letter-spacing:.05em;
+}
+.ad-bottom-frame{
+  height:50px; min-width:280px; border-radius:11px;
+  border:1px dashed var(--line-2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:11.5px; color:var(--faint);
+  text-align:center; padding:0 10px;
+}
+
+/* ============================================================
+   SPLASH / OPENING AD
+   ============================================================ */
+.splash{
+  position:fixed; inset:0; z-index:100;
+  display:flex; align-items:center; justify-content:center;
+  background:
+    radial-gradient(circle at 20% 0%, #16302B 0%, transparent 55%),
+    radial-gradient(circle at 100% 10%, #12241F 0%, transparent 45%),
+    var(--bg);
+  padding:24px;
+  transition:opacity .4s var(--ease), visibility .4s var(--ease);
+}
+.splash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+.splash-inner{
+  width:100%; max-width:340px;
+  display:flex; flex-direction:column; align-items:center;
+}
+.brand{ display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:26px; }
+.brand svg{ width:40px; height:40px; color:var(--brass); }
+.brand-name{ font-size:30px; font-weight:700; letter-spacing:-0.01em; color:var(--ink); }
+.brand-tag{ font-size:12px; color:var(--muted); margin-top:-6px; }
+
+.ad-box{
+  width:100%; position:relative;
+  padding:10px;
+  border:1px solid var(--line-2);
+  border-radius:20px;
+  background:rgba(255,255,255,0.025);
+}
+.ad-box .ad-tag{
+  position:absolute; top:-9px; left:14px;
+  font-size:9.5px; padding:2px 8px; border-radius:100px;
+  background:var(--bg); border:1px solid var(--line-2);
+  color:var(--faint); letter-spacing:.05em;
+}
+.ad-box-frame{
+  width:100%; max-width:300px; height:250px;
+  margin:0 auto;
+  border-radius:14px;
+  border:1px dashed var(--line-2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; color:var(--faint); text-align:center; padding:0 20px;
+}
+.ad-skip{
+  margin-top:18px;
+  width:44px; height:44px; border-radius:50%;
+  border:1.5px solid var(--line-2);
+  background:rgba(255,255,255,0.04);
+  color:var(--muted);
+  font-size:15px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  cursor:not-allowed;
+  transition:color .2s, border-color .2s, background .2s;
+}
+.ad-skip.ready{
+  cursor:pointer; color:var(--ink);
+  border-color:var(--brass); background:rgba(201,162,39,0.12);
+}
+.ad-skip svg{ width:17px; height:17px; }
+
+/* ---- PIN unlock modal ---- */
+.pin-backdrop{
+  position:fixed; inset:0; z-index:60;
+  background:rgba(5,10,9,0.65);
+  opacity:0; pointer-events:none;
+  transition:opacity .22s var(--ease);
+}
+.pin-backdrop.show{ opacity:1; pointer-events:auto; }
+.pin-modal{
+  position:fixed; left:50%; top:50%; z-index:61;
+  transform:translate(-50%,-46%) scale(0.96);
+  opacity:0; pointer-events:none;
+  transition:opacity .22s var(--ease), transform .22s var(--ease);
+  width:calc(100% - 64px); max-width:300px;
+  background:linear-gradient(180deg,var(--surface-2),var(--surface));
+  border:1px solid var(--line-2);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:22px 20px;
+  text-align:center;
+}
+.pin-modal.show{ opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
+.pin-label{ font-size:13px; color:var(--muted); margin:0 0 14px; line-height:1.4; }
+#pinInput{
+  width:100%;
+  font-family:'Manjari',sans-serif; font-weight:700;
+  font-size:26px; letter-spacing:12px; text-align:center;
+  padding:12px 0 12px 12px;
+  border-radius:12px;
+  border:1.5px solid var(--line-2);
+  background:rgba(255,255,255,0.04);
+  color:var(--ink);
+  outline:none;
+}
+#pinInput:focus{ border-color:var(--brass); }
+.pin-error{ font-size:12px; color:var(--lvl-red); margin:10px 0 0; display:none; }
+.pin-error.show{ display:block; }
+.pin-actions{ display:flex; gap:10px; margin-top:16px; }
+.pin-btn{
+  flex:1; padding:11px 0; border-radius:12px;
+  font-size:14px; cursor:pointer; border:1.5px solid var(--line-2);
+}
+.pin-btn.ghost{ background:transparent; color:var(--muted); }
+.pin-btn.solid{ background:var(--brass); border-color:var(--brass); color:#0B1614; }
+
+.disclaimer{
+  flex:none;
+  margin:0 20px calc(14px + env(safe-area-inset-bottom,0));
+  font-size:10px; line-height:1.5; color:var(--faint);
+  text-align:center;
+}
+.disclaimer a{ color:var(--brass); text-decoration:none; }
+.disclaimer a:hover{ text-decoration:underline; }
+
+@media (prefers-reduced-motion:reduce){
+  .rain{ animation:none; }
+  .district.lvl-red{ animation:none; }
+  .district, .sheet, .backdrop, .splash{ transition:none; }
+}
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash" role="dialog" aria-modal="true" aria-label="Opening">
+  <div class="splash-inner">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 17a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4-1.8A5 5 0 0 0 6.5 16"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>
+      <h1 class="brand-name">മഴഅലേർട്ട്</h1>
+      <p class="brand-tag mono">കേരള സംസ്ഥാന മഴ മുന്നറിയിപ്പ്</p>
+    </div>
+    <div class="ad-box">
+      <span class="ad-tag">പരസ്യം</span>
+      <div class="ad-box-frame">ഇവിടെ പരസ്യ ചിത്രം ചേർക്കുക<br><span class="mono" style="font-size:10.5px;opacity:.75;">300 × 250px</span></div>
+    </div>
+    <button class="ad-skip" id="adSkip" disabled aria-label="Close">5</button>
+  </div>
+</div>
+
+<div class="app">
+
+  <header class="header">
+    <div class="rain"></div>
+    <div class="header-row">
+      <h1 id="titleTap">മഴ അലേർട്ട്</h1>
+    </div>
+    <p class="subline" id="dateLine">—</p>
+    <p class="updated-line mono" id="lastSync">—</p>
+  </header>
+
+  <main class="map-wrap">
+    <svg class="map" id="mapSvg" viewBox="0 0 1080 1920" xmlns="http://www.w3.org/2000/svg">
+      <g id="districtLayer">
+        <path id="Kasaragod" class="district" tabindex="0" role="button" d="M276.5,226.5v1.78l-8-1.78l-7,1l-4.71,0.78l-4.29,3.22l-2,3l-6,2l-2,1v2l1,3l-3,3l-4-2l-4-5h-5
+          l-5,3l-5,1l-3,2v3l1,2l-2,3l-5,4l-3,4l-6,4l-4,2l-1,2v3l-2,3h-3.76l-3.24-3l-3,1l-2.05,2l-3.95,3l-3,3v3l2,4l4,2l6,1c0,0,3,0,4,1
+          s2,2,2,2l1,3l-1,3h-5.18l-3.82-4l-4,1c0,0,0,4-1,4s-4,1-4,1h-4.41c0,0-2.59-3-3.59-2s-4,3-4,3v2l2,3l-1,7l-1,1c0,0-2,1-3-2
+          s-4-4-4-4h-2l-2,1l-3-3l-3-4l-2-4c0,0-2-5-2-7s-5-12-5-13s-4-12-4-12s-3-8-4-10s-6-13-6-13s-6-12-6-13s-6-14-6-14l-3-12l-4-7l-4-8
+          l-3-8l-4-12l-3-13l-3-9l-4-9l-8-24l-3-7l-1-4l-4-12l-3-11c0,0-2-6-2-7s-3-6-3-6l-1-7v-4.03l1-3.97c0,0,0-2,1-3h11.39l20.61-13
+          h19.86l6.14-4l6-1l2,4l-2,10l-4,3l-5,3l-1,3l1,2l3,2l1,3l2,3h4.14l2.86-1l4.29,1l3.71,2l3,1l2-3l3-4h3l2,2v5l2,6l-1,2h-4.05
+          l-1.95,2v4l3,2l4,3.61l3,0.39h3.69l2.31-2l3-3v-4.2l1-4.8h1l2,1l2,4l2,2h6v2.39l1,2.61l2.03,2l5.97,3l4,2l2,2l3,1h5.84l2.16-1l3-2
+          h2l2,2l-2,4l-5,1l-3,1l-2,1v2l4,6l3,1h4.39l1.61-2h3l2,3v4.59l2,5.41l4,6l5.5,4.54h6.66v7.02c0,0,0.84,3.44,0.84,4.44s3,6,3,6l4,4
+          l3,4l8,2l1,4v2.88l4,3.12l2,3v5.63l-1,4.37l-2,3l1,4l3,3l3,4l6,6v2.95l-1,4.05l1,3.61l4,4.39l3,4L276.5,226.5z"/>
+        <path id="Kannur" class="district" tabindex="0" role="button" d="M445.5,395.5l-2,4l2,2l1,3l-2,2l-2,4l-3,3l-4,3l-5,2l-4,1h-5l-6,1l-3-1h-6l-3,1l-5,1l-4,5l1,4.07
+          v5.93l-4,4l-3,1l-3-2l-2-1h-3v8l-5,1l-4-2l-2-3l-6-3l-5,1l-3,2l-3,4l-3,3l-3,4l-6,3l-5,5l-4,5l-3,5l-4,4l-6,1l-1,2.24v5.76l-1,4
+          l-4,4l-4,2l-4-2l-1-4l-2-2h-4l-4-1l-3-4l-5-7l-3-4l-1-4l-5-6l-2-3l-5-5l-1-3l-3-7l-4-4l-5.14-4h-3.86l-2-5l-3-3h-3l-5.16,1h-3.84
+          l-3-6l-3-5l-7-6l-7-5l-2-7l-5-10l-7-7l-3-7l-7-4l-3-3l-2-4l-2-3l-3-1l-4-1l-3,1l-4,2l-3,1l-4-1l-4-3l-3-4l-1-7v-6l1-5l1-4.39v-5.61
+          l-1-5l-2-5l-3-3l-1-3l2-1h2c0,0,3,1,4,4s3,2,3,2l1-1l1-7l-2-3v-2c0,0,3-2,4-3s3.59,2,3.59,2h4.41c0,0,3-1,4-1s1-4,1-4l4-1l3.82,4
+          h5.18l1-3l-1-3c0,0-1-1-2-2s-4-1-4-1l-6-1l-4-2l-2-4v-3l3-3l3.95-3l2.05-2l3-1l3.24,3h3.76l2-3v-3l1-2l4-2l6-4l3-4l5-4l2-3l-1-2v-3
+          l3-2l5-1l5-3h5l4,5l4,2l3-3l-1-3v-2l2-1l6-2l2-3l4.29-3.22l4.71-0.78l7-1l8,1.78l1-0.78l4,1h5l2.12-1h4.88l3,1c0,0,0,4,0,6s1,3,1,3
+          l3,3l1,2l5,2l1,3l1,5l-1,3l1,4l2,1l1,4l3,5c0,0,2,3,2,4s3,2,3,2l2,3l3,4l3,5l2,3l4,2l5-1l2,1v3l2,4l4,5l3,3l3,2h5l3.46-2h3.54
+          c0,0,1,2,2,2s1,4,1,4l1,3l3,2l2,2l4,1l4-1l1-2l2-2l6-1l4,2l4,1l1,2v5l3,9l-1,1l1,5l2,4l2,2c0,0,3,2,3,3s2,2,2,2v5l-1,4v4l2,4l4,2
+          l2-1l5,1l3,5v3l2,4l3,3l5,1l4,1l3,1l4,3l-1,1.88L445.5,395.5z"/>
+        <polygon id="Wayanad" class="district" tabindex="0" role="button" points="668.5,507.5 668.5,510.5 665.5,513.5 664.5,515.5 662.5,517.5 659.5,518.5 658.5,520.5
+          656.45,520.5 654.5,519.5 651.5,517.5 647.5,518.5 644.5,519.5 642.5,521.5 641.5,524.5 641.5,527.5 639.5,530.5 636.5,531.5
+          635.5,533.5 633.5,536.5 631.68,536.5 629.5,535.5 625.5,535.5 621.89,536.5 620.5,538.5 619.5,540.5 614.91,540.5 612.5,538.5
+          611.5,537.5 609.5,537.5 607.5,539.5 606.5,541.5 602.5,543.5 599.5,544.5 598.5,546.5 595.5,546.5 593.5,547.5 592.5,550.5
+          592.5,557.5 591.5,560.5 590.5,562.5 585.5,561.5 581.04,562.5 580.5,564.5 577.5,565.5 574.57,565.5 569.5,566.5 569.5,569.5
+          566.5,571.5 566.5,578.5 568.5,580.5 567.5,583.5 566.5,584.5 564.5,585.5 561.5,586.5 558,587.43 555.5,589.5 552.96,589.5
+          549.5,590.5 546.5,590.5 542.5,587.5 540.5,586.5 537.5,584.5 532.5,581.5 528.5,579.5 524.5,578.5 521.5,575.5 521.5,572.5
+          522.5,569.5 521.5,567.5 518.5,565.5 514.5,562.5 510.5,561.5 505.5,562.5 502.5,564.5 499.5,565.5 498.5,564.5 493.5,562.5
+          490.5,561.5 487.5,559.5 486.5,558.5 482.5,557.5 478.5,557.5 474.5,555.5 471.5,555.5 469.5,553.5 465.5,552.5 461.5,549.5
+          460.5,543.5 458.5,541.5 455.5,535.5 450.5,536.5 450.5,534.5 447.5,531.6 443.5,531.5 441.5,527.5 441.5,526.4 442.5,523.5
+          442.5,521.5 438.5,519.5 437.5,516.5 438.5,513.5 440.5,511.5 441.5,508.5 439.5,505.5 438.5,502.5 440.5,499.5 444.5,497.5
+          443.5,494.5 439.5,491.5 434.5,489.5 428.5,486.5 422.5,485.5 418.5,484.5 413.5,478.5 409.5,476.5 404.5,472.5 401.5,470.5
+          397.5,469.5 396.5,467.5 396.5,464.28 399.5,461.5 401.5,459.5 401.5,453.5 399.5,450.5 396.5,450.23 395.5,449.5 395.5,446.06
+          398.5,444.5 398.5,442.5 397.5,439.5 396.5,437.5 395.5,436.5 395.5,430.57 394.5,426.5 398.5,421.5 403.5,420.5 406.5,419.5
+          412.5,419.5 415.5,420.5 421.5,419.5 426.5,419.5 430.5,418.5 435.5,416.5 439.5,413.5 442.5,410.5 444.5,406.5 446.5,404.5
+          445.5,401.5 443.5,399.5 445.5,395.5 446.5,393.38 447.5,391.5 452.5,391.5 455.5,392.5 457.5,394.5 466.23,394.5 472.5,395.5
+          481.5,396.5 485.5,398.5 488.5,399.5 493.5,398.5 498.5,394.5 507.5,390.5 512.5,385.5 513.5,383.5 515.5,383.5 521.5,382.5
+          528.5,378.5 532.5,374.5 535.94,374.5 538.5,375.5 539.5,378.5 539.5,384.28 538.5,400.5 539.5,411.34 541.5,421.5 544.5,425.5
+          548.5,427.5 553.5,427.5 556.5,424.5 560.5,422.5 563.5,419.5 566.5,418.5 570.5,422.5 574.5,422.5 576.5,423.5 577.5,426.5
+          575.5,431.5 575.5,435.5 578.5,443.5 581.5,447.5 585.5,449.5 589.5,449.5 595.5,448.5 600.5,443.5 603.5,442.5 605.5,442.5
+          607.5,445.5 608.96,449.5 611.5,451.5 616.5,456.5 618.5,460.5 621.5,462.5 626.5,464.5 631.5,463.5 637.5,463.5 645.5,459.5
+          650.5,458.5 652.5,459.5 654.5,463.5 657.5,467.5 661.5,470.5 661.5,473.47 660.5,476.5 657.5,478.5 654.32,478.5 652.5,480.5
+          652.5,484.5 653.5,489.5 655.5,492.5 657.5,496.5 660.5,497.5 662.5,499.5 666.5,501.5"/>
+        <path id="Kozhikode" class="district" tabindex="0" role="button" d="M549.5,590.5v2l-1,2l-2,2l-3,1l1,2l1,3l-1,3l-2,2l-3,2h-4l-3.5,2.01l-2.5,1.99h-2.39l-1.61,3v3
+          l3,4l-1,2l-4,1l-2,5c0,0,5,3,4,4s-2,3-2,3l2,2l6,3l2,6l-2,2l3,3v2l-5,2l-4,1l-5,3l-3,4l-2,2l-5,1l-4,1l-4,2l-1,3l-1,4l-2,1l-3-2
+          l-3-3h-3l-3,3l1,4l-2,3l-4-1l-2-3l-3-3l-4-1l-3,2l-2,3l-3,2l-4,1h-5.97l-5.03,1l-2,2l-1,2l-2-1l-3-2l-3,3l-4,6v3l-3,2l-2,1l-1,3
+          v5.78l3,2.22h6.05l0.95,1v1l-4,4h-4.48l-2.52,2l-1,2l-1,3l-4,2l-2,2v4.52l-2,0.48h-3.76l-3.24-1l-1.29,1l-1.71,1l-3,1l-1,2l-2-2
+          l-1-4l-3-6l-4-2l-3-1c0,0-1-1-1-2s0-4.65,0-4.65l-1-6.35l-2-5l-2-10l-2-4l-1-6l-1-4l-2-3l-2-4l-1-1v-6.12l-1-5.88l-2-3l-2-4
+          c0,0-2-2-2-3s-2-3-2-3l-3-3l-2-6l-1-5l-2-6l-1-4l-2-3l-1-4l-2-3l-2-5l-2-3l-3-4l-4-4l-1-3l-4-2l-1-2l-2-1l-4-6v-2.84l-1-3.16v-5
+          l-1-2l-2-6l-2-4l-1-4v-3.8l-2-5.2l-2-4v-3l-2-7l-1-3l-1-5l-5-10l-2-5l-2-4l-1-3l-3-5l-2.5-3.31l-1.5-2.69v-1.46l-1-2.54l-1-2l-2-3
+          l4,1h4l2,2l1,4l4,2l4-2l4-4l1-4v-5.76l1-2.24l6-1l4-4l3-5l4-5l5-5l6-3l3-4l3-3l3-4l3-2l5-1l6,3l2,3l4,2l5-1v-8h3l2,1l3,2l3-1l4-4
+          l1,1l1,2l1,3v2l-3,1.56v3.44l1,0.73l3,0.27l2,3v6l-2,2l-3,2.78v3.22l1,2l4,1l3,2l5,4l4,2l5,6l4,1l6,1l6,3l5,2l4,3l1,3l-4,2l-2,3
+          l1,3l2,3l-1,3l-2,2l-1,3l1,3l4,2v2l-1,2.9v1.1l2,4l4,0.1l3,2.9v2l5-1l3,6l2,2l1,6l4,3l4,1l2,2h3l4,2h4l4,1l1,1l3,2l3,1l5,2l1,1l3-1
+          l3-2l5-1l4,1l4,3l3,2l1,2l-1,3v3l3,3l4,1l4,2l5,3l3,2l2,1l4,3H549.5z"/>
+        <path id="Malappuram" class="district" tabindex="0" role="button" d="M711.5,660.5l-2,4l-5,4l-7,3l-4,3l-6,6l-5,4l-5,3l-3,1l-4,2v3l-1,4v6h-6.56l-3.44-1l-4-3l-3,1
+          l-3,2l-4,2l-3,1l-1,3l-1,4l-2,2v3l2,2l-1,3l-1,2l1,2l2,2l-1,4l-2,1v2l1,2l2,2l-1,4l-2,2l-3,2l-1,3l-2,2l-1,2h-7l-2,3l-4,3v5l-2,5v2
+          h-6.54l-2.46,3v2l1,3l3,1l1,3l-1,3l-1,2l1,2l2,3l6,2v2l-1,2l-1,4l-6,3l-1,3c0,0-2,3-2,4s-1,4-1,4l-2,1v2l1,3l1,2l1,3l-2,2l1,4v2h-2
+          l-4-1l-2-1l-1.73,2l-3.27-1l-1-2l-3,1l-1.61,2l-3.39,1l-2-1h-3l-1,3l-7,7l-2,1l-4-2l-3-2l-4-1l-4-2h-4l-3,1l-2,3l-1,3c0,0-2,0-3-1
+          s-3-4-3-4l-3-3h-2l-6,6l-4,1l-3-2h-3l-2.31,3l-4.69,3h-4.12l-1.88,1l-1,3v3.8l-4,1.2l-4,1l-2,1l-3,2h-5.37l-2.63,3l-3,3l-3,2v4l1,2
+          h5l-1,2l1,2l-4,4l-1,4v3l1,3l1,2l6,2l2,3l4,1v2l2,2l-1,2l-2,1l-4,3l-4,4l-2,3l-6,2l-4,1h-3.31l-2.69-1l-3-1l-3,1l-6,4l-2-2l-4-8
+          l-2-6l-3-5l-2-5l-4-6l-3-5l-1-6l-1-5v-8l-1-3l-2-9l-2-7l-1-6v-8.33l-1-4.67l-2-12l-2-6l-1-8l-2-9l-2-7l-1-6l-1-8l-1-5l-1-6l-2-6
+          l-1-6l-2-5l-2-3l-1-7l1-2l3-1l1.71-1l1.29-1l3.24,1h3.76l2-0.48v-4.52l2-2l4-2l1-3l1-2l2.52-2h4.48l4-4v-1l-0.95-1h-6.05l-3-2.22
+          v-5.78l1-3l2-1l3-2v-3l4-6l3-3l3,2l2,1l1-2l2-2l5.03-1h5.97l4-1l3-2l2-3l3-2l4,1l3,3l2,3l4,1l2-3l-1-4l3-3h3l3,3l3,2l2-1l1-4l1-3
+          l4-2l4-1l5-1l2-2l3-4l5-3l4-1l5-2v-2l-3-3l2-2l-2-6l-6-3l-2-2c0,0,1-2,2-3s-4-4-4-4l2-5l4-1l1-2l-3-4v-3l1.61-3h2.39l2.5-1.99
+          l3.5-2.01h4l3-2l2-2l1-3l-1-3l-1-2l3-1l2-2l1-2v-2l3.46-1h2.54l2.5-2.07l3.5-0.93l3-1l2-1l1-1l1-3l-2-2v-7l3-2v-3l5.07-1h2.93l3-1
+          l0.54-2l4.46-1l5,1l1-2h1l3-3l2,1l1,1v3l-1,1l-1,3l-2,2l-1,2v4l-1,2v3l2,2l5,2l4-1l3-2l6,2l2,3l4,4l4,2h3l2,1l3,1l4-1l4,4l3,1l3,3
+          l4,1h13v2.35l1,2.65v4.16l4,2.84l4,2l5,4l5,2l7,4l4,2l1,3l4,4h10.07l1.93,2l-1,3l-1,2l-1,6l1,5l3,4L711.5,660.5z"/>
+        <path id="Palakkad" class="district" tabindex="0" role="button" d="M834,889v3.11l-3,2.89l-2,3l-1,2v4l-1,3l-3,2v3l-2,1v3l-1,1v3l1,2v7l-1,5l-1,2l-2,2l-7,1h-4v2
+          l-2,3l-1,4l1,2l5,5l2,3l-2,3l-2,2l4,6c0,0,1,1,1,2v4c0,1,1,6,1,6l-3,2l-2,2v3l2,4v9c0,0,0,5-1,5s-2,5-2,5l-4,6l-1,2l2,2l2,4v6l2,3
+          l1,3v3l-1,5l-2,5l-2,2l-4-1h-6l-4.85,1l-3.15,2l-5,2l-6-3l-4,1l-2.11,2l-3.89-1l-3-3h-2l-2,1l-4-1l-7-2l-6-10l-3-2l-5-1h-3l-3,3
+          l-4-2l-3-5l-2-2l-3-4l-5-3l-2-2l-3-2h-4l-6-2h-6l-12-2l-1-4l1-3l-4-3h-5l-4-2l-2-3l-1-5l-2-3l-1-4l-3-3l-3-2c0,0,0-3.62,0-3.81
+          s1-2.19,1-2.19l-3-2l-2-4l-9-9l2-3l4-3l5-2l-2-4l-1-6l2-2h3l3-3l3-2v-3l-1.28-2.38L655,931l-3-1l-4-2l-3-4l-1-3l3-2l2-1v-8l1-2l2-3
+          l-2-3l-1-2l-3-1l-5,1h-8l-6,1h-3l-1-3l-1-2l-4-1l-4,1l-3,3l-2,3c0,0-2-1-3-1s-3-2-3-2h-4l-5-1l-3-1h-6l-2-2h-3l-5,3l-3-2
+          c0,0-3-1-4,0s-3,3-3,3l-6-2l-1-4l2-2l-1-2l-4,1l-1,1h-1l-5-1l-3-3h-5l-3,2l1,3l4,2l1,2l-3,4l-3,2.57l-1,3.43l-3,2l-4,1v4.21
+          l-2,1.79l-6-1l-2-3l-2-1l-3,1l-2,2l-4-2l-5-2l-2-1l-4-1h-2l-2.5-0.5v-2l-4-1l-2-3l-6-2l-1-2l-1-3v-3l1-4l4-4l-1-2l1-2h-5l-1-2v-4
+          l3-2l3-3l2.63-3h5.37l3-2l2-1l4-1l4-1.2v-3.8l1-3l1.88-1h4.12l4.69-3l2.31-3h3l3,2l4-1l6-6h2l3,3c0,0,2,3,3,4s3,1,3,1l1-3l2-3l3-1
+          h4l4,2l4,1l3,2l4,2l2-1l7-7l1-3h3l2,1l3.39-1l1.61-2l3-1l1,2l3.27,1l1.73-2l2,1l4,1h2v-2l-1-4l2-2l-1-3l-1-2l-1-3v-2l2-1
+          c0,0,1-3,1-4s2-4,2-4l1-3l6-3l1-4l1-2v-2l-6-2l-2-3l-1-2l1-2l1-3l-1-3l-3-1l-1-3v-2l2.46-3h6.54v-2l2-5v-5l4-3l2-3h7l1-2l2-2l1-3
+          l3-2l2-2l1-4l-2-2l-1-2v-2l2-1l1-4l-2-2l-1-2l1-2l1-3l-2-2v-3l2-2l1-4l1-3l3-1l4-2l3-2l3-1l4,3l3.44,1h6.56l2.5-1.5l3-2l4-1l5,1
+          l2,3l3,1l3,2l3-1l4-1l4-2h5l5.89,0.5L717,701l4-1l3,2l5,3h6l8-4l6-6l4-3l3-2l4-1h1.89l2.11,5l2,2.11l3,5.89l-1,6l-2,2.32l-4,1.68
+          l-2,3l-3,3l-1,3l1,4l2,3l3,2l4,1h4.4l1.6,2l1,1l1,4l-1,2l-1.06,2.5L773,744l2,2l1,3l-1,4l-1,3l-2,3v2l2,4l2,3.11l3-0.11l3,1l3-2
+          l2,1v2.23l-2,2.77l-5,5l-3,1l-3-1l-4-2l-4-0.91l-2,0.91l-3,2c0,0-1,2-2,2s-2,2-2,2l-3,4l-3,15l-1,3l-1,2l1,3l-1,5v3l1,2l4,1l7,7
+          l3,2h15l2,3l3,4l3,1.98l1,2.02l3,3l5,1l3,2l3,1l1,1l2-2l2-1l3-2h3l2,1l3,1l2,1l0.62,2v16.45L822,866l1,3l2,2l3,2l2,3l1,1l2,6v3
+          L834,889z"/>
+        <path id="Thrissur" class="district" tabindex="0" role="button" d="M806.5,1076.5l-2,2h-4l-7-2l-12,3l-4,3l-6,2l-5-2l-3-1l-4,3l-9,3l-11,1l-8-3l-3-3l-5-1l-4,2
+          l-4-2l-6-1h-4l-4-5l-4-1l-3,4l-6,2l-6-1l-7-2h-10l-4-2h-7l-5-1l-2-2l-3,1l-5,2l-7,1l-4,1l-3-3l-3,1l-2,5l-3,3l-3,4l-2,2l-6,2v3l2,3
+          l-2,2l-3,1l-5-1l-2,2v5l-1,3h-6l-4,1v2l3,2l-1,3l-3,2h-5l-4,2l-3-1l-3-3l-2-4l-2-2h-5l-3.5-1.99l-3.5-1.01h-5l-4,2l-3,2l-4,1l-6,1
+          h-9l-4,2l-3,1l-2-0.97v-5.03l-2-6l-1-7l-1-6l-4-8l-2-7l-3-8l-2-6l-2-13l-3-12l-4-12l-3-8l-3-7l-7-19l-3-11l-3-13l-5-11l-7-17l-1-3
+          l-2-4l-2-6l6-4l3-1l3,1l2.69,1h3.31l4-1l6-2l2-3l4-4l4-3l2-1l1-2l-2-2l2.5,0.5h2l4,1l2,1l5,2l4,2l2-2l3-1l2,1l2,3l6,1l2-1.79V909
+          l4-1l3-2l1-3.43l3-2.57l3-4l-1-2l-4-2l-1-3l3-2h5l3,3l5,1h1l1-1l4-1l1,2l-2,2l1,4l6,2c0,0,2-2,3-3s4,0,4,0l3,2l5-3h3l2,2h6l3,1l5,1
+          h4c0,0,2,2,3,2s3,1,3,1l2-3l3-3l4-1l4,1l1,2l1,3h3l6-1h8l5-1l3,1l1,2l2,3l-2,3l-1,2v8l-2,1l-3,2l1,3l3,4l4,2l3,1l2.72,1.62L659,935
+          v3l-3,2l-3,3h-3l-2,2l1,6l2,4l-5,2l-4,3l-2,3l9,9l2,4l3,2c0,0-1,2-1,2.19s0,3.81,0,3.81l3,2l3,3l1,4l2,3l1,5l2,3l4,2h5l4,3l-1,3
+          l1,4l12,2h6l6,2h4l3,2l2,2l5,3l3,4l2,2l3,5l4,2l3-3h3l5,1l3,2l6,10l7,2l4,1l2-1h2l3,3l3.89,1l2.11-2l4-1l6,3l5-2l3.15-2l4.85-1h6
+          l4,1l0.5,1.5l-0.37,2.5l-2.63,1.5l-2,3v3l2,4l3,5L806.5,1076.5z"/>
+        <path id="Ernakulam" class="district" tabindex="0" role="button" d="M814.5,1114.5v2l2,3l-1,3l2,2l2,5h5l5,1l1,2.44l-3,2.56l-3,1l-2,2v6h-4l-3,1l-1,2v7l-1,2l-4-2
+          l-5-1h-5l-2,1v3.46l1,2.54l-2,5v5l1,2h-1.93l-3.07,1l-1,2l-2,2l-4,1l-2,2l-2,1l-3,1l-1,1v6l1,3v2l-1,2.2l-3,0.8l-2-2l-2-1h-3l-3,1
+          l-4,6l1,2l3,2v2l-2,3h-4.46l-3.54,1h-2.84l-2.16,1v4.12l1,1.88l-2,3l-2-1l-4-3h-8l-4,2l-3,3l-4,2v1.88l1,3.12l2,1v2l-2,2l2,3l-1,2
+          l-2,1.69h-4.65l-3.35-0.69h-4c0,0-2.47,0.38-2.73,0.69c-0.27,0.31-2.27,3.31-2.27,3.31l-3,2h-3.8l-3.2-1l-4,6l-3,1l-3-1l-3.2,1
+          l-1.8,3l-2,4v3.01l-3,0.99l-4,1l-2,1l-2,2h-2.76l-3.24-2l-1-2h-7l-3-1l-1-4l-2-2l-3-2l-1-2l-3-1l-3,1l-4,4h-8l-3-2l-2,3l-2,2l-3,2
+          l-4,3l-4-1l-3-1l-2-2h-1l-6-1v-3c0,0-1-2-1-3s0-3.37,0-3.37v-1.85l-2,0.22l-2-1l-3,2c0,0-2,1-3,1h-5c-1,0-5-1-5-1l-3-2l-3,1l-1,1
+          l-1,2v3.67l-3,2.33l-1,2h-2l-2,1h-6l-1-4l-1-3v-7l-1-5l-1-4l-2-6v-6l-2-4v-5l-3-12l-3-8l-2-8l-3-8l-2-4l-1-6l-5-10l-2-6l-5-10l-1-5
+          l-2-5l-1-7l-0.9-6l-0.1-3l-1-1.97l2,0.97l3-1l4-2h9l6-1l4-1l3-2l4-2h5l3.5,1.01l3.5,1.99h5l2,2l2,4l3,3l3,1l4-2h5l3-2l1-3l-3-2v-2
+          l4-1h6l1-3v-5l2-2l5,1l3-1l2-2l-2-3v-3l6-2l2-2l3-4l3-3l2-5l3-1l3,3l4-1l7-1l5-2l3-1l2,2l5,1h7l4,2h10l7,2l6,1l6-2l3-4l4,1l4,5h4
+          l6,1l4,2l4-2l5,1l3,3l8,3l11-1l9-3l4-3l3,1l5,2l6-2l4-3l12-3l7,2h4l2-2l1,1l2,1h3v4.01l2,2.99l7,3l6,8l3,2v2l-2,2l-4,1l-3,1
+          l-3,2.39l-1,2.61l-1,4L814.5,1114.5z"/>
+        <path id="Alappuzha" class="district" tabindex="0" role="button" d="M749.5,1471.5v3.12l-2,1.88l-4,2l-6,4l1,4v3c0,0,0,1,0,2s-1,4-1,4v4l-2,3l-3,2l-3,3v3l2,1l-1,3
+          l-1,2v3l2,1l4,1l1,1l-2,4l-2,2l-2,1v3l1,4c0,0,0,2,0,3s-1,3-1,3l-6,4l-1,3v2h-4l-3-1l-1,2h-5l-3,1l-2,1l-1,2l-1,3l-3,1l-2,3h-2
+          l-3,1l-2,1c0,0-2,1-2,2s-1,3-1,3l-2,3l-1,3l-4,1l-2,2h-7.63l-0.37-2l-2-1h-2l-2,2l-3,1l-3,2l-3-1l-2-2h-3l-4-1c0,0-2,0-2-1
+          s-2-1-2-2s0-4,0-4l-2-2h-3l-4-1l-1,1l-4-1l-2,1h-4l-2-1h-2l-2-2l-2-6l-2-7l-6-12l-2-5l-2-7l-3-5l-2-4l-4-10l-2-6l-2-5l-5-15l-2-5
+          c0,0-2-6-2-7s-3-9-3-9l-2-7l-4-10l-1-8l-3-8l-2-6l-2-9l-1-7l-1-14v-26.05l1-5.95l-1-10l-1-4v-4.31l-1-13.69l-2-6l1-7v-8l-1-4l-1-3
+          l-0.5-5.61l-0.5-4.39l-1-7l-1-5v-5l-1-4v-10h6l2-1h2l1-2l3-2.33v-3.67l1-2l1-1l3-1l3,2c0,0,4,1,5,1h5c1,0,3-1,3-1l3-2l2,1l2-0.22
+          v1.85c0,0,0,2.37,0,3.37s1,3,1,3v3l6,1h1l-1,2l0.5,2.72l-0.5,1.28l2,2v2l-3,3v5.1l-1,2.9l-1,2l2,5l0.5,3.69l3.5,2.31l1,1v4.16
+          l-1,2.84l-2.5,3.93v2.8l1.5,3.27l-2,6l2,4l4,2l1,3v3l-1,5v9l-1,6l-2,4l-1,4l-2,2l1,5l1,3.29v3.71l1,6l3,1l5-1l1-1l4,1l1,3h3.29
+          l1.71-2h3l4,1l1,3v1l2,2l3,1l1,4v4l1,2h6l3,1l2,3v3l-3,3l2,2h5.33l1.67-2l5.86,2l2.14,2l5,2h4l5-3l4-3l4-2h4l4,1l4-2l2-6l3-2h3l8,4
+          h3l3,2l1,3l3,4l2,2l3-2l8-4l4,1l1,2l1,3l3,2l2,2v2.88l-1,2.12l-2,3l-3,2l2,1l1,3l-1,3v5c0,0-1,1-1,2s2,2,2,2l2,4l-2,2l-3,1l-1,2
+          l1,4l2,3l-1,4l1,4l4,4L749.5,1471.5z"/>
+        <path id="Pathanamthitta" class="district" tabindex="0" role="button" d="M980.5,1479.5l-1,3v3l-2,4l-1,4l-1,6v9l-2,3l-2,2l-3,1l-1,2l2,4l-2,6v6l-1,4l-3,5l-1,6
+          l-2,3l-3,3h-4.59l-3.41,3l-3,2l-1,3l-3,3l-3,2l-3,3l-2,4v3l-1,4l-1,2l-3-2l-5-2l-2,1l-3,1l-4-2l-4-3l-6,2l-3,2l-4-2l-4-4l-5-1l-5-2
+          l-3-2l-4-5l-4-4l-4-1h-5l-6-2l-5-4l-4-1l-6-3l-6-1c0,0-5-1-5-2s-5-4-5-4l-4-3h-3l-3,2v3.69l3,3.31l5,2l2,2l1,4l-3,1h-4l-4-2.86
+          l-5-3.14l-2-1l-2,1l-3,2l-2-3l-2-1l-9,9l2,4l-2,1.71l-6,0.29l-3-3l-4-3h-4l-3-1l-4,2l-4,3l-3,3v3.31l2,2.69l-1,3l-2,1l-4-4h-11
+          l-2,3h-3l-4,1l-1,1l-3-1l-3-2l2-2l4-3l-3-3v-5l-2-2l-4-1l-3-5v-2l1-3l6-4c0,0,1-2,1-3s0-3,0-3l-1-4v-3l2-1l2-2l2-4l-1-1l-4-1l-2-1
+          v-3l1-2l1-3l-2-1v-3l3-3l3-2l2-3v-4c0,0,1-3,1-4s0-2,0-2v-3l-1-4l6-4l4-2l2-1.88v-3.12l-1-2l-4-4l-1-4l1-4l-2-3l-1-4l1-2l3-1l2-2
+          l-2-4c0,0-2-1-2-2s1-2,1-2v-5l1-3l-1-3l-2-1l3-2l2-3l1-2.12v-2.88l3-2h3l3-1l2-3l2-1v-7l2-1h2l3,1l2-2l3-1h3l2,2l5,4l3,2.16l5,0.84
+          l4-2h3l4,2l3,2l4,2l5,3l5,1h2l4,2l1.84,2h3.16l2-2v-4l-1-2v-1l1-2l3-1l1-2l6-2l4-1v2.63l-1,3.37l1,3l7,1h3l2,2v4l2,2h6.67l5.33-1
+          l4-3h4l3,1l3-2l-1-6l1-1.22l5-2.78l6-4l5-3h3.31l4.69,2h5l8-5h12.44l1.56,2l1,3l3,3l4,2l3-1l2,1l2.29,2.5l3.71,3.5l3,3v3.18
+          l1.07,2.82l2.93,1l2,3v3.39l2,3.61l2,2v1.93l-2,2.07l-2,1v6l-2,1l-2,3l1,2l2,1v3l-2,1l-1,2v2l2,2v2l-2,2l-2,1v2l2,2l3,1l3,3h3.29
+          l1.71,1l1,2l3,1h2.07L980.5,1479.5z"/>
+        <path id="Kottayam" class="district" tabindex="0" role="button" d="M847.5,1398.5v1.61l-1,2.39l-4,1l-6,2l-1,2l-3,1l-1,2v1l1,2v4l-2,2h-3.16l-1.84-2l-4-2h-2l-5-1
+          l-5-3l-4-2l-3-2l-4-2h-3l-4,2l-5-0.84l-3-2.16l-5-4l-2-2h-3l-3,1l-2,2l-3-1h-2l-2,1v7l-2,1l-2,3l-3,1h-3l-3,2l-2-2l-3-2l-1-3l-1-2
+          l-4-1l-8,4l-3,2l-2-2l-3-4l-1-3l-3-2h-3l-8-4h-3l-3,2l-2,6l-4,2l-4-1h-4l-4,2l-4,3l-5,3h-4l-5-2l-2.14-2l-5.86-2l-1.67,2h-5.33
+          l-2-2l3-3v-3l-2-3l-3-1h-6l-1-2v-4l-1-4l-3-1l-2-2v-1l-1-3l-4-1h-3l-1.71,2h-3.29l-1-3l-4-1l-1,1l-5,1l-3-1l-1-6v-3.71l-1-3.29
+          l-1-5l2-2l1-4l2-4l1-6v-9l1-5v-3l-1-3l-4-2l-2-4l2-6l-1.5-3.27v-2.8l2.5-3.93l1-2.84v-4.16l-1-1l-3.5-2.31l-0.5-3.69l-2-5l1-2
+          l1-2.9v-5.1l3-3v-2l-2-2l0.5-1.28l-0.5-2.72l1-2l2,2l3,1l4,1l4-3l3-2l2-2l2-3l3,2h8l4-4l3-1l3,1l1,2l3,2l2,2l1,4l3,1h7l1,2l3.24,2
+          h2.76l2-2l2-1l4-1l3-0.99v-3.01l2-4l1.8-3l3.2-1l3,1l3-1l4-6l3.2,1h3.8l3-2c0,0,2-3,2.27-3.31c0.26-0.31,2.73-0.69,2.73-0.69h4
+          l3.35,0.69h4.65l2-1.69l1,2v3l3,1l2,2h2.61l3.39,2h4.2l1.8,1l1,4h2l2,2l1,2.5l2,3.5h2.71l3.29,2l2,2l2.69,1l3.31-1l3-1l2-2h2l2,2
+          l6,4l5,5l6,8l8,11l5,5h7l3,2l2,5l3,4v3.54l2,1.46l3,3l2,5v4.16l2,2.84l2,2v3.24l1,3.76l2,2l1,4l-1,2l-4,1l-3-2l-3,1l-1.86,1
+          l-2.14,2v3l1,4v4l-1,4l-2,1v2l2,2l4,3l2,3l2,4l-1,2v2l3,2h2.35l0.65,3v2l2,0.93l2-0.93l1-1h2l2,1l2,2v2.41l1,1.59l2,1L847.5,1398.5
+          z"/>
+        <path id="Idukki" class="district" tabindex="0" role="button" d="M1023.5,1380.5l-1,3l-2,2v16l-4,2l-3,2h-3.59l-2.41,1h-1v2l-1,2l-2,2l-1,3v3l-2,2l-1,2v2l2,2l1,3
+          l-4,4l-1,2v9l-2,3v4l-1,2h-6l-1,2l-3,2l-1,2l2,4l-1,3l-3,2v2l-1,5.52v3.48l-1.93-1h-2.07l-3-1l-1-2l-1.71-1h-3.29l-3-3l-3-1l-2-2
+          v-2l2-1l2-2v-2l-2-2v-2l1-2l2-1v-3l-2-1l-1-2l2-3l2-1v-6l2-1l2-2.07v-1.93l-2-2l-2-3.61v-3.39l-2-3l-2.93-1l-1.07-2.82v-3.18l-3-3
+          l-3.71-3.5l-2.29-2.5l-2-1l-3,1l-4-2l-3-3l-1-3l-1.56-2H923.5l-8,5h-5l-4.69-2h-3.31l-5,3l-6,4l-5,2.78l-1,1.22l1,6l-3,2l-3-1h-4
+          l-4,3l-5.33,1h-6.67l-2-2v-4l-2-2h-3l-7-1l-1-3l1-3.37v-2.63l1-2.39v-1.61l-1-1l-2-1l-1-1.59v-2.41l-2-2l-2-1h-2l-1,1l-2,0.93
+          l-2-0.93v-2l-0.65-3h-2.35l-3-2v-2l1-2l-2-4l-2-3l-4-3l-2-2v-2l2-1l1-4v-4l-1-4v-3l2.14-2l1.86-1l3-1l3,2l4-1l1-2l-1-4l-2-2
+          l-1-3.76v-3.24l-2-2l-2-2.84v-4.16l-2-5l-3-3l-2-1.46v-3.54l-3-4l-2-5l-3-2h-7l-5-5l-8-11l-6-8l-5-5l-6-4l-2-2h-2l-2,2l-3,1
+          l-3.31,1l-2.69-1l-2-2l-3.29-2h-2.71l-2-3.5l-1-2.5l-2-2h-2l-1-4l-1.8-1h-4.2l-3.39-2h-2.61l-2-2l-3-1v-3l-1-2l1-2l-2-3l2-2v-2
+          l-2-1l-1-3.12v-1.88l4-2l3-3l4-2h8l4,3l2,1l2-3l-1-1.88v-4.12l2.16-1h2.84l3.54-1h4.46l2-3v-2l-3-2l-1-2l4-6l3-1h3l2,1l2,2l3-0.8
+          l1-2.2v-2l-1-3v-6l1-1l3-1l2-1l2-2l4-1l2-2l1-2l3.07-1h1.93l-1-2v-5l2-5l-1-2.54v-3.46l2-1h5l5,1l4,2l1-2v-7l1-2l3-1h4v-6l2-2l3-1
+          l3-2.56l-1-2.44l-5-1h-5l-2-5l-2-2l1-3l-2-3v-2l2-1l1-4l1-2.61l3-2.39l3-1l4-1l2-2v-2l2,1l1.95-0.5l4.05-2.5l3-1h6.29l6.71,2l4,2
+          l2-1l5-4l4-3l8-2l2-1v-3.56l1-5.44l2-4l5-4l7-4l6-3l5-5l5-3l3-5l6-4l3-1h3l2,2l5,2l6-1h2l3-2l3,2l1,3v5.56l1,5.44l3,5l4.93,4.5
+          l2.07,3.5l1,4l-1,6v8l3,4l3,1l4,2v6.8l-2,3.2l-2,5l-1,6v4l-1,3l-2,3v4l-1,7l-1,4l-6,4l-4,4l-3,5l-2,3l2,3l1,5l2,7l2,5l1,6l1,5l4,6
+          v4l-2,5v2l-1,3l-3,2l-4,2l-2,2l-1,4l-4,4l-1,3v2l2,3l2,5l1,3v5c0,0-1,1-1,2s-1,5-1,5l1,2l2,3h3l1,2l1,3l-4,6l-3,3v1l-1,3v8l-1,4
+          l-2,3l-1,3l-1,2l1,3l-2,8v4l-1,2l-1,4l-4,6l-1,3l-1,6v3l4,4h2l2,1h2l2-1h2l2,3l3,1l4,3l5,2h5l4,1l4-2.93l2-2.07l3-3l4-2l3-1h3l1,2
+          l1,3v4l1,2h8l2,1l1,3v4l3,3l3,1v6l2,2l3,1h4l1,2l3,1l3-1h3v2L1023.5,1380.5z"/>
+        <path id="Kollam" class="district" tabindex="0" role="button" d="M957.5,1665.5v3.12l-1,2.88l-2,3l-2,6l-3,3l-3,2l-6,3l-3,3l-3,2l-1,2l-1,3l-1,4l-2,3l-1,2l-5-1
+          l-3-1l-4-1l-3-3l-3-2l-4-4l-2-4l-3-3l-3-2l-10-6l-3-2l-4-1h-10l-7,7l-1,4l-1,6l-2,1l1,4l1,2v3l-2,2l-2.78,1l-4.22,1h-5.82l-2.18,1
+          l-2-2l-3-2h-4l-2,2l-4,2l-6,2h-3.2l-2.8-3l-2-3l-2,1l-2,2l-2,1l-5.12,2h-3.88l-5-1l-3-1l-6-6l-4-2l-5-3l-5-2l-6-2l-2-2c0,0,0-2-1-3
+          s-2-4-2-4l-3-2l-4-1h-4l-2-2l-3-1l-4,1l-4-1h-5l-2-1l-4-3l-3,1l-2,1l-2,2v2.22l1,3.78v4l-1,2.35l-3,0.65l-3,2l-6,2h-5l-2,1l-2,2
+          l-10,5l-5-5l-3-4l-4-6l-3-5l-3-3l-5-4l-10-10l-3-4l-1-6l-1-4l-1-6l-2-7l-6-18l-3-5l-4-11l-3-7l-3-6l-1-5l-2.44-6l-2.56-5l-2-5l-1-4
+          l-1-1h2l2,1h4l2-1l4,1l1-1l4,1h3l2,2c0,0,0,3,0,4s2,1,2,2s2,1,2,1l4,1h3l2,2l3,1l3-2l3-1l2-2h2l2,1l0.37,2h7.63l2-2l4-1l1-3l2-3
+          c0,0,1-2,1-3s2-2,2-2l2-1l3-1h2l2-3l3-1l1-3l1-2l2-1l3-1h5l1-2l3,1h4l3,5l4,1l2,2v5l3,3l-4,3l-2,2l3,2l3,1l1-1l4-1h3l2-3h11l4,4
+          l2-1l1-3l-2-2.69v-3.31l3-3l4-3l4-2l3,1h4l4,3l3,3l6-0.29l2-1.71l-2-4l9-9l2,1l2,3l3-2l2-1l2,1l5,3.14l4,2.86h4l3-1l-1-4l-2-2l-5-2
+          l-3-3.31v-3.69l3-2h3l4,3c0,0,5,3,5,4s5,2,5,2l6,1l6,3l4,1l5,4l6,2h5l4,1l4,4l4,5l3,2l5,2l5,1l4,4l4,2l3-2l6-2l4,3l4,2l3-1l2-1l5,2
+          l3,2l-1,2v1.9l-2,2.1h-3.78l-3.22,1l-1,1v5.61l-1,2.39l-2,2l-1,3v2l5,5l2,3v4l0.5,2.78l2.5,2.22l2,2l1,3v3l2,1.95l1,4.05l2,2l2,3
+          l3,2l1,3l3,1l2,1l1,3l2,4l2,3l3,2l1,2L957.5,1665.5z"/>
+        <path id="Thiruvananthapuram" class="district" tabindex="0" role="button" d="M972.5,1773.5v3.63l-1,2.37l-2,4l-1,3l-1,2h-4l-5-1l-3-2h-9l-1,1l-0.88,2l0.88,3v8
+          l3,3l1,3l-1,4l-8,4l-2,3l-2,2l-4,2l-2,2l-2,3l-1,4l-6,9l-3,4l-2,4l-3-1v-2l-2,1v2l1,3l2,3l2.03,1.5l-0.03,2.5v2l-2,2v1l1,3l1,2v3
+          l-4,2h-4.56l-4.44,1l-2,2h-4.54l-2.46,2l-3,4l-2.8,2.75l-3.2,1.25l-2,3h-6.29l-3.71-1l-4-2l-3-2l-3-1l-3-3l-6-3l-4-3l-3-2l-3-1
+          l-2-4l-5-3l-4-3l-2-1l-3-3l-6-4l-4-3l-9-6l-4-3l-8-4l-5-4l-4-1l-4-4l-1-4l-4-5l-5-4l-6-6l-6-7l-6-6l-3-4l-6-7l-7-7l-1-4l-8-10l-7-7
+          v-3.82l-2-3.18l-4-4l-6-10l-6-7l-3-4l-4-5l-3-5l-4-4l-3-5l10-5l2-2l2-1h5l6-2l3-2l3-0.65l1-2.35v-4l-1-3.78v-2.22l2-2l2-1l3-1l4,3
+          l2,1h5l4,1l4-1l3,1l2,2h4l4,1l3,2c0,0,1,3,2,4s1,3,1,3l2,2l6,2l5,2l5,3l4,2l6,6l3,1l5,1h3.88l5.12-2l2-1l2-2l2-1l2,3l2.8,3h3.2l6-2
+          l4-2l2-2h4l3,2l2,2l2.18-1h5.82l4.22-1l2.78-1l2-2v-3l-1-2l-1-4l2-1l1-6l1-4l7-7h10l4,1l3,2l10,6l3,2l3,3l2,4l4,4l3,2l3,3l4,1l3,1
+          l5,1l1,1v3.78l-0.5,4.42l1.5,1.8l2,3l3,2v3.5l1,3.5v3.73l1,3.27l3,2h2.76l5.24,4h6.84l2.16,1.37l1,3.63l4,4l4,3v4l5,10
+          L972.5,1773.5z"/>
+      </g>
+    </svg>
+  </main>
+
+  <div class="ad-bottom">
+    <span class="ad-tag">പരസ്യം</span>
+    <div class="ad-bottom-frame">ഇവിടെ പരസ്യ ചിത്രം · 320 × 50px</div>
+  </div>
+
+  <p class="disclaimer">ഇവിടെ കാണിച്ചിരിക്കുന്ന വിവരങ്ങളിൽ മാറ്റം വന്നേക്കാം. അപ്ഡേറ്റ് സംബന്ധിച്ച പ്രശ്നങ്ങൾക്കോ പരസ്യം നൽകാനോ ബന്ധപ്പെടുക: <a href="mailto:hello@mazhaalert.in">hello@mazhaalert.in</a></p>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="sheet-close" id="sheetClose" aria-label="Close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+  </button>
+  <div class="sheet-handle" id="sheetHandle"><span></span></div>
+  <div class="sheet-body">
+    <div class="sheet-ribbon" id="sheetRibbon"><i></i><span id="sheetRibbonText">—</span></div>
+    <div class="sheet-head">
+      <div class="mini-shape-wrap" id="miniShapeWrap"></div>
+      <div>
+        <h2 id="sheetName">—</h2>
+        <p class="district-sub" id="sheetSub">കേരളം</p>
+      </div>
+    </div>
+    <p class="sheet-msg" id="sheetMsg"></p>
+
+    <div class="rows">
+      <div class="row">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 12 2a7 7 0 0 1 7 7.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></div>
+        <div class="txt">
+          <div class="label">ജില്ലാ കളക്ടർ</div>
+          <div class="value" id="sheetCollector">—</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v13"/><path d="M6 22h13a2 2 0 0 0 2-2v-1H6a2 2 0 0 0-2 2 2 2 0 0 0 2 2z"/><path d="M8 7h7M8 10h5"/></svg></div>
+        <div class="txt">
+          <div class="label">സ്കൂളുകൾ</div>
+          <div class="value" id="sheetSchool">—</div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+        <div class="txt">
+          <div class="label">അവസാനം അപ്ഡേറ്റ് ചെയ്തത്</div>
+          <div class="value" id="sheetUpdated">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="edit-panel" id="editPanel" style="display:none;">
+      <div class="edit-label mono">അലേർട്ട് നില മാറ്റുക</div>
+      <div class="level-picker" id="levelPicker">
+        <div class="level-chip" data-level="green"><i style="background:var(--lvl-green)"></i>സുരക്ഷിതം</div>
+        <div class="level-chip" data-level="yellow"><i style="background:var(--lvl-yellow)"></i>മഞ്ഞ</div>
+        <div class="level-chip" data-level="orange"><i style="background:var(--lvl-orange)"></i>ഓറഞ്ച്</div>
+        <div class="level-chip" data-level="red"><i style="background:var(--lvl-red)"></i>റെഡ്</div>
+      </div>
+      <div class="school-toggle-row">
+        <span>സ്കൂളുകൾക്ക് അവധി</span>
+        <div class="switch" id="schoolSwitch"><em></em></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="pin-backdrop" id="pinBackdrop"></div>
+<div class="pin-modal" id="pinModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <p class="pin-label">എഡിറ്റ് മോഡ് തുറക്കാൻ PIN നൽകുക</p>
+  <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinInput" autocomplete="off">
+  <p class="pin-error" id="pinError">തെറ്റായ PIN, വീണ്ടും ശ്രമിക്കുക</p>
+  <div class="pin-actions">
+    <button class="pin-btn ghost" id="pinCancel">റദ്ദാക്കുക</button>
+    <button class="pin-btn solid" id="pinConfirm">ശരി</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA — default alert values. Once opened, admins can also
+   edit level / school-leave live from the pencil icon in the
+   header; those edits are saved in this browser's storage.
+   level: "green" | "yellow" | "orange" | "red"
+   collector: leave "" if not set yet — the app shows a clean
+   placeholder instead of guessing.
+   schoolLeave: true/false
+   message: short bulletin line shown in the sheet
+   updated: any short string
+   ============================================================ */
+const DATA = {
+  Kasaragod:          { level:"red",    collector:"", schoolLeave:true,  message:"കനത്ത മഴയ്ക്ക് റെഡ് അലേർട്ട് പ്രാബല്യത്തിൽ. താഴ്ന്ന പ്രദേശങ്ങളിലും മലയോര മേഖലകളിലും അധിക ജാഗ്രത പാലിക്കുക.", updated:"ഇന്ന്, രാവിലെ 7:30" },
+  Kannur:             { level:"orange", collector:"", schoolLeave:false, message:"ദിവസം മുഴുവൻ ശക്തമായ മഴ പ്രതീക്ഷിക്കുന്നു. പ്രാദേശിക വെള്ളക്കെട്ടിന് സാധ്യത.", updated:"ഇന്ന്, രാവിലെ 7:30" },
+  Wayanad:            { level:"red",    collector:"", schoolLeave:true,  message:"മലയോര മേഖലയിൽ ഉരുൾപൊട്ടൽ സാധ്യതയുള്ളതിനാൽ റെഡ് അലേർട്ട്. അനാവശ്യ യാത്രകൾ ഒഴിവാക്കുക.", updated:"ഇന്ന്, രാവിലെ 7:15" },
+  Kozhikode:          { level:"yellow", collector:"", schoolLeave:false, message:"ഒറ്റപ്പെട്ട ശക്തമായ മഴയ്ക്ക് സാധ്യത. തുടർന്നും ജാഗ്രത പാലിക്കുക.", updated:"ഇന്ന്, രാവിലെ 7:00" },
+  Malappuram:         { level:"orange", collector:"", schoolLeave:false, message:"കിഴക്കൻ പ്രദേശങ്ങളിൽ ശക്തമായ മഴ പ്രവചനം. തയ്യാറെടുപ്പ് ആവശ്യമാണ്.", updated:"ഇന്ന്, രാവിലെ 7:00" },
+  Palakkad:           { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല. കാലാവസ്ഥ സാധാരണ നിലയിലാകും.", updated:"ഇന്ന്, രാവിലെ 6:45" },
+  Thrissur:           { level:"yellow", collector:"", schoolLeave:false, message:"ഉച്ചയ്ക്ക് ശേഷം മിതമായതും ശക്തവുമായ മഴ സാധ്യത.", updated:"ഇന്ന്, രാവിലെ 6:45" },
+  Ernakulam:          { level:"orange", collector:"", schoolLeave:false, message:"ജില്ലയിൽ ശക്തമായ മഴയ്ക്ക് അലേർട്ട്. കായൽ തീരങ്ങളിലെ താഴ്ന്ന പ്രദേശങ്ങൾ ജാഗ്രത പാലിക്കുക.", updated:"ഇന്ന്, രാവിലെ 7:10" },
+  Alappuzha:          { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല.", updated:"ഇന്ന്, രാവിലെ 6:45" },
+  Pathanamthitta:     { level:"yellow", collector:"", schoolLeave:false, message:"മലയോര മേഖലയിൽ ഒറ്റപ്പെട്ട ശക്തമായ മഴയ്ക്ക് സാധ്യത.", updated:"ഇന്ന്, രാവിലെ 6:50" },
+  Kottayam:           { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല.", updated:"ഇന്ന്, രാവിലെ 6:45" },
+  Idukki:             { level:"red",    collector:"", schoolLeave:true,  message:"മലയോര മേഖലകളിൽ ഉരുൾപൊട്ടലിനും പെട്ടെന്നുള്ള വെള്ളപ്പൊക്കത്തിനും സാധ്യത കൂടുതൽ. യാത്ര ഒഴിവാക്കുക.", updated:"ഇന്ന്, രാവിലെ 7:20" },
+  Kollam:             { level:"yellow", collector:"", schoolLeave:false, message:"ദിവസം മുഴുവൻ ജാഗ്രത പാലിക്കേണ്ട സാഹചര്യം.", updated:"ഇന്ന്, രാവിലെ 6:50" },
+  Thiruvananthapuram: { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല.", updated:"ഇന്ന്, രാവിലെ 6:45" }
+};
+
+/* ---- restore any edits saved earlier in this browser ---- */
+const STORAGE_KEY = "mazhaalert_overrides_v1";
+try{
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+  Object.keys(saved).forEach(id=>{
+    if(DATA[id]) Object.assign(DATA[id], saved[id]);
+  });
+}catch(e){}
+
+function persistOverrides(){
+  const out = {};
+  Object.keys(DATA).forEach(id=>{
+    out[id] = { level: DATA[id].level, schoolLeave: DATA[id].schoolLeave };
+  });
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(out)); }catch(e){}
+}
+
+const NAMES_ML = {
+  Kasaragod:"കാസർകോട്", Kannur:"കണ്ണൂർ", Wayanad:"വയനാട്", Kozhikode:"കോഴിക്കോട്",
+  Malappuram:"മലപ്പുറം", Palakkad:"പാലക്കാട്", Thrissur:"തൃശ്ശൂർ", Ernakulam:"എറണാകുളം",
+  Alappuzha:"ആലപ്പുഴ", Pathanamthitta:"പത്തനംതിട്ട", Kottayam:"കോട്ടയം", Idukki:"ഇടുക്കി",
+  Kollam:"കൊല്ലം", Thiruvananthapuram:"തിരുവനന്തപുരം"
+};
+
+const LEVEL_META = {
+  green:  { label:"സുരക്ഷിതം",           sub:"സാധാരണ നില" },
+  yellow: { label:"മഞ്ഞ അലേർട്ട്",       sub:"ജാഗ്രത പാലിക്കുക" },
+  orange: { label:"ഓറഞ്ച് അലേർട്ട്",     sub:"തയ്യാറെടുക്കുക" },
+  red:    { label:"റെഡ് അലേർട്ട്",       sub:"നടപടി സ്വീകരിക്കുക" }
+};
+
+/* ---------- paint the map ---------- */
+const svgNS = "http://www.w3.org/2000/svg";
+const shapes = document.querySelectorAll(".district");
+shapes.forEach(el=>{
+  const d = DATA[el.id];
+  if(!d) return;
+  el.classList.add("lvl-"+d.level);
+  el.setAttribute("aria-label", el.id + " — " + LEVEL_META[d.level].label);
+});
+
+/* ---------- district name labels, sized to each shape ---------- */
+const mapSvg = document.getElementById("mapSvg");
+const labelLayer = document.createElementNS(svgNS,"g");
+labelLayer.setAttribute("id","labelLayer");
+mapSvg.appendChild(labelLayer);
+
+shapes.forEach(el=>{
+  const bbox = el.getBBox();
+  const cx = bbox.x + bbox.width/2;
+  const cy = bbox.y + bbox.height/2;
+  const area = bbox.width * bbox.height;
+  const label = NAMES_ML[el.id] || el.id;
+  let fontSize = Math.sqrt(area) / 7.5;
+  fontSize = Math.max(10, Math.min(fontSize, 19));
+  if(label.length > 8) fontSize = Math.min(fontSize, 12.5);
+
+  const text = document.createElementNS(svgNS,"text");
+  text.setAttribute("class","district-label");
+  text.setAttribute("x", cx);
+  text.setAttribute("y", cy);
+  text.setAttribute("font-size", fontSize.toFixed(1));
+  text.textContent = NAMES_ML[el.id] || el.id;
+  labelLayer.appendChild(text);
+});
+
+/* ---------- header ---------- */
+document.getElementById("dateLine").textContent = new Date().toLocaleDateString("ml-IN",{ weekday:"long", day:"numeric", month:"long" });
+document.getElementById("lastSync").textContent = "അപ്ഡേറ്റ് ചെയ്തത് " + new Date().toLocaleTimeString("ml-IN",{hour:"2-digit",minute:"2-digit"});
+
+/* ---------- sheet elements ---------- */
+const backdrop   = document.getElementById("backdrop");
+const sheet      = document.getElementById("sheet");
+const sheetClose = document.getElementById("sheetClose");
+let activeEl = null;
+let adminMode = false;
+
+/* ---------- hidden admin unlock ----------
+   Tap the app title 5 times quickly to bring up a PIN pad.
+   No visible button — works the same with touch or a mouse.
+   Change ADMIN_PIN below to whatever you like. */
+const ADMIN_PIN = "2468";
+const titleTap   = document.getElementById("titleTap");
+const pinBackdrop = document.getElementById("pinBackdrop");
+const pinModal   = document.getElementById("pinModal");
+const pinInput   = document.getElementById("pinInput");
+const pinError   = document.getElementById("pinError");
+
+let tapCount = 0;
+let tapTimer = null;
+titleTap.addEventListener("click", ()=>{
+  tapCount += 1;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(()=>{ tapCount = 0; }, 1200);
+  if(tapCount >= 5){
+    tapCount = 0;
+    if(adminMode){
+      adminMode = false;
+      document.getElementById("editPanel").style.display = "none";
+    } else {
+      openPinModal();
+    }
+  }
+});
+
+function openPinModal(){
+  pinError.classList.remove("show");
+  pinInput.value = "";
+  pinBackdrop.classList.add("show");
+  pinModal.classList.add("show");
+  pinModal.setAttribute("aria-hidden","false");
+  setTimeout(()=>pinInput.focus(), 150);
+}
+function closePinModal(){
+  pinBackdrop.classList.remove("show");
+  pinModal.classList.remove("show");
+  pinModal.setAttribute("aria-hidden","true");
+}
+function tryPin(){
+  if(pinInput.value === ADMIN_PIN){
+    adminMode = true;
+    closePinModal();
+    if(activeEl) document.getElementById("editPanel").style.display = "block";
+  } else {
+    pinError.classList.add("show");
+    pinInput.value = "";
+    pinInput.focus();
+  }
+}
+document.getElementById("pinConfirm").addEventListener("click", tryPin);
+document.getElementById("pinCancel").addEventListener("click", closePinModal);
+pinBackdrop.addEventListener("click", closePinModal);
+pinInput.addEventListener("keydown", e=>{ if(e.key === "Enter") tryPin(); });
+
+const LEVEL_ORDER = ["green","yellow","orange","red"];
+function repaintDistrict(id){
+  const el = document.getElementById(id);
+  const d = DATA[id];
+  LEVEL_ORDER.forEach(l=>el.classList.remove("lvl-"+l));
+  el.classList.add("lvl-"+d.level);
+  el.setAttribute("aria-label", id + " — " + LEVEL_META[d.level].label);
+}
+
+document.getElementById("levelPicker").addEventListener("click", e=>{
+  const chip = e.target.closest(".level-chip");
+  if(!chip || !activeEl) return;
+  const id = activeEl.id;
+  DATA[id].level = chip.dataset.level;
+  repaintDistrict(id);
+  persistOverrides();
+  openSheet(activeEl);
+});
+
+document.getElementById("schoolSwitch").addEventListener("click", ()=>{
+  if(!activeEl) return;
+  const id = activeEl.id;
+  DATA[id].schoolLeave = !DATA[id].schoolLeave;
+  persistOverrides();
+  openSheet(activeEl);
+});
+
+function miniIcon(el, color){
+  const wrap = document.getElementById("miniShapeWrap");
+  wrap.innerHTML = "";
+  const bbox = el.getBBox();
+  const pad = Math.max(bbox.width, bbox.height) * 0.10;
+  const svg = document.createElementNS(svgNS,"svg");
+  svg.setAttribute("class","mini-shape");
+  svg.setAttribute("viewBox", (bbox.x-pad)+" "+(bbox.y-pad)+" "+(bbox.width+pad*2)+" "+(bbox.height+pad*2));
+  const clone = el.cloneNode(false);
+  clone.removeAttribute("class");
+  clone.removeAttribute("tabindex");
+  clone.removeAttribute("role");
+  clone.removeAttribute("aria-label");
+  clone.setAttribute("fill", color);
+  clone.setAttribute("stroke", "rgba(0,0,0,0.4)");
+  clone.setAttribute("stroke-width","2.5");
+  svg.appendChild(clone);
+  wrap.appendChild(svg);
+}
+
+function fieldRow(id, value, isLink){
+  const node = document.getElementById(id);
+  if(value){
+    node.classList.remove("empty");
+    if(isLink){
+      node.innerHTML = '<a class="value" target="_blank" rel="noopener" href="'+value+'">'+value.replace(/^https?:\/\//,"")+'</a>';
+    } else {
+      node.textContent = value;
+    }
+  } else {
+    node.classList.add("empty");
+    node.textContent = "ഇതുവരെ ചേർത്തിട്ടില്ല";
+  }
+}
+
+function openSheet(el){
+  const id = el.id;
+  const d = DATA[id];
+  if(!d) return;
+
+  if(activeEl) activeEl.classList.remove("is-active");
+  activeEl = el;
+  el.classList.add("is-active");
+
+  const meta = LEVEL_META[d.level];
+  const computedColor = getComputedStyle(document.documentElement).getPropertyValue("--lvl-"+d.level).trim();
+
+  document.getElementById("sheetRibbon").style.background = "color-mix(in srgb, "+computedColor+" 22%, transparent)";
+  document.getElementById("sheetRibbon").style.color = computedColor;
+  document.getElementById("sheetRibbon").style.borderColor = "color-mix(in srgb, "+computedColor+" 45%, transparent)";
+  document.getElementById("sheetRibbon").style.border = "1px solid color-mix(in srgb, "+computedColor+" 45%, transparent)";
+  document.querySelector("#sheetRibbon i").style.background = computedColor;
+  document.getElementById("sheetRibbonText").textContent = meta.label + " — " + meta.sub;
+
+  document.getElementById("sheetName").textContent = NAMES_ML[id] || id;
+  document.getElementById("sheetMsg").textContent = d.message || "";
+
+  fieldRow("sheetCollector", d.collector, false);
+
+  const schoolNode = document.getElementById("sheetSchool");
+  schoolNode.innerHTML = d.schoolLeave
+    ? '<span class="chip on">ഇന്ന് സ്കൂളുകൾക്ക് അവധി</span>'
+    : '<span class="chip off">സ്കൂളുകൾ പതിവ് പോലെ പ്രവർത്തിക്കുന്നു</span>';
+
+  document.getElementById("sheetUpdated").textContent = d.updated || "—";
+
+  miniIcon(el, computedColor);
+
+  document.getElementById("editPanel").style.display = adminMode ? "block" : "none";
+  document.querySelectorAll(".level-chip").forEach(chip=>{
+    chip.classList.toggle("selected", chip.dataset.level === d.level);
+    chip.style.color = chip.dataset.level === d.level
+      ? getComputedStyle(document.documentElement).getPropertyValue("--lvl-"+chip.dataset.level).trim()
+      : "";
+  });
+  document.getElementById("schoolSwitch").classList.toggle("on", !!d.schoolLeave);
+
+  backdrop.classList.add("show");
+  sheet.classList.add("show");
+  sheet.setAttribute("aria-hidden","false");
+}
+
+function closeSheet(){
+  backdrop.classList.remove("show");
+  sheet.classList.remove("show");
+  sheet.setAttribute("aria-hidden","true");
+  if(activeEl){ activeEl.classList.remove("is-active"); activeEl = null; }
+}
+
+shapes.forEach(el=>{
+  el.addEventListener("click", ()=>openSheet(el));
+  el.addEventListener("keydown", e=>{
+    if(e.key==="Enter" || e.key===" "){ e.preventDefault(); openSheet(el); }
+  });
+});
+backdrop.addEventListener("click", closeSheet);
+sheetClose.addEventListener("click", closeSheet);
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSheet(); });
+
+/* simple swipe-down to dismiss */
+let startY = null;
+const handle = document.getElementById("sheetHandle");
+function onStart(y){ startY = y; sheet.style.transition = "none"; }
+function onMove(y){
+  if(startY===null) return;
+  const dy = Math.max(0, y - startY);
+  sheet.style.transform = "translateY(" + dy + "px)";
+}
+function onEnd(y){
+  if(startY===null) return;
+  const dy = y - startY;
+  sheet.style.transition = "";
+  sheet.style.transform = "";
+  startY = null;
+  if(dy > 90) closeSheet();
+}
+handle.addEventListener("touchstart", e=>onStart(e.touches[0].clientY), {passive:true});
+handle.addEventListener("touchmove", e=>onMove(e.touches[0].clientY), {passive:true});
+handle.addEventListener("touchend", e=>onEnd(e.changedTouches[0].clientY));
+
+/* ---------- opening splash / ad ---------- */
+const splash = document.getElementById("splash");
+const adSkip = document.getElementById("adSkip");
+let count = 5;
+adSkip.textContent = count;
+const countdown = setInterval(()=>{
+  count -= 1;
+  if(count > 0){
+    adSkip.textContent = count;
+  } else {
+    clearInterval(countdown);
+    adSkip.disabled = false;
+    adSkip.classList.add("ready");
+    adSkip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+  }
+}, 1000);
+adSkip.addEventListener("click", ()=>{
+  if(adSkip.disabled) return;
+  splash.classList.add("hide");
+});
+
+</script>
+</body>
+</html>
