@@ -25,10 +25,16 @@
   --line:      rgba(237,243,239,0.09);
   --line-2:    rgba(237,243,239,0.16);
 
+  --lvl-white:  #E7ECE6;
   --lvl-green:  #3F8F5F;
   --lvl-yellow: #E4B73B;
   --lvl-orange: #DC7A33;
   --lvl-red:    #C2453C;
+
+  --sch-normal: #8FA69E;
+  --sch-holiday:#C2453C;
+  --sch-camp:   #DC7A33;
+  --sch-taluk:  #E4B73B;
 
   --shadow: 0 24px 60px -20px rgba(0,0,0,0.6);
   --ease: cubic-bezier(.22,.68,.32,1);
@@ -117,6 +123,30 @@ button{ font-family:inherit; font-weight:700; }
   text-align:center;
 }
 
+.day-toggle{
+  position:relative;
+  display:flex; gap:4px;
+  margin-top:14px;
+  padding:4px;
+  border-radius:12px;
+  border:1px solid var(--line-2);
+  background:rgba(255,255,255,0.03);
+}
+.day-btn{
+  flex:1;
+  padding:9px 0;
+  border:none; border-radius:9px;
+  background:transparent;
+  color:var(--muted);
+  font-size:13.5px; font-weight:700;
+  cursor:pointer;
+  transition:background .18s var(--ease), color .18s var(--ease);
+}
+.day-btn.active{
+  background:var(--brass);
+  color:#0B1614;
+}
+
 /* ---- map ---- */
 .map-wrap{
   flex:1;
@@ -167,6 +197,7 @@ svg.map{
   stroke-width:3px;
   transform:scale(1.012);
 }
+.district.lvl-white{  fill:var(--lvl-white); }
 .district.lvl-green{  fill:var(--lvl-green); }
 .district.lvl-yellow{ fill:var(--lvl-yellow); }
 .district.lvl-orange{ fill:var(--lvl-orange); }
@@ -293,6 +324,8 @@ svg.mini-shape{ width:100%; height:100%; }
 }
 .chip.on{ background:rgba(194,69,60,0.16); border-color:rgba(194,69,60,0.4); color:#F1B2AC; }
 .chip.off{ background:rgba(255,255,255,0.03); color:var(--muted); }
+.chip.camp{ background:rgba(220,122,51,0.16); border-color:rgba(220,122,51,0.4); color:#F2B98A; }
+.chip.taluk{ background:rgba(228,183,59,0.16); border-color:rgba(228,183,59,0.4); color:#F0D68A; }
 
 .sheet-close{
   position:absolute; top:14px; right:16px;
@@ -330,25 +363,10 @@ svg.mini-shape{ width:100%; height:100%; }
 }
 .level-chip i{ width:8px; height:8px; border-radius:50%; flex:none; }
 .level-chip.selected{ color:var(--ink); border-color:currentColor; background:rgba(255,255,255,0.06); }
-.school-toggle-row{
-  display:flex; align-items:center; justify-content:space-between;
+.edit-note{
   margin-top:14px;
+  font-size:10.5px; line-height:1.5; color:var(--faint);
 }
-.school-toggle-row span{ font-size:13px; color:var(--ink); }
-.switch{
-  position:relative; width:44px; height:26px; flex:none;
-  border-radius:100px; border:1px solid var(--line-2);
-  background:rgba(255,255,255,0.06);
-  cursor:pointer;
-}
-.switch em{
-  position:absolute; top:2px; left:2px; width:20px; height:20px;
-  border-radius:50%; background:var(--muted);
-  transition:transform .18s var(--ease), background .18s var(--ease);
-  font-style:normal;
-}
-.switch.on{ background:rgba(194,69,60,0.25); border-color:rgba(194,69,60,0.5); }
-.switch.on em{ transform:translateX(18px); background:var(--lvl-red); }
 
 /* ---- bottom ad bar ---- */
 .ad-bottom{
@@ -367,7 +385,7 @@ svg.mini-shape{ width:100%; height:100%; }
   color:var(--faint); letter-spacing:.05em;
 }
 .ad-bottom-frame{
-  height:50px; min-width:280px; border-radius:11px;
+  height:75px; width:100%; min-width:280px; border-radius:11px;
   border:1px dashed var(--line-2);
   display:flex; align-items:center; justify-content:center;
   font-size:11.5px; color:var(--faint);
@@ -420,22 +438,15 @@ svg.mini-shape{ width:100%; height:100%; }
   font-size:13px; color:var(--faint); text-align:center; padding:0 20px;
   text-decoration:none; cursor:pointer;
 }
-.ad-skip{
-  margin-top:18px;
-  width:44px; height:44px; border-radius:50%;
-  border:1.5px solid var(--line-2);
-  background:rgba(255,255,255,0.04);
-  color:var(--muted);
-  font-size:15px; font-weight:700;
-  display:flex; align-items:center; justify-content:center;
-  cursor:not-allowed;
-  transition:color .2s, border-color .2s, background .2s;
+.ad-spinner{
+  margin-top:20px;
+  width:26px; height:26px;
+  border-radius:50%;
+  border:2.5px solid var(--line-2);
+  border-top-color:var(--brass);
+  animation:spin 0.8s linear infinite;
 }
-.ad-skip.ready{
-  cursor:pointer; color:var(--ink);
-  border-color:var(--brass); background:rgba(201,162,39,0.12);
-}
-.ad-skip svg{ width:17px; height:17px; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
 
 /* ---- PIN unlock modal ---- */
 .pin-backdrop{
@@ -511,7 +522,7 @@ svg.mini-shape{ width:100%; height:100%; }
       <span class="ad-tag">പരസ്യം</span>
       <a class="ad-box-frame" id="splashAdLink" href="#" target="_blank" rel="noopener noreferrer">ഇവിടെ പരസ്യ ചിത്രം ചേർക്കുക<br><span class="mono" style="font-size:10.5px;opacity:.75;">300 × 250px</span></a>
     </div>
-    <button class="ad-skip" id="adSkip" disabled aria-label="Close">5</button>
+    <div class="ad-spinner" id="adSpinner" aria-hidden="true"></div>
   </div>
 </div>
 
@@ -521,6 +532,10 @@ svg.mini-shape{ width:100%; height:100%; }
     <div class="rain"></div>
     <div class="header-row">
       <h1 id="titleTap">മഴ അലേർട്ട്</h1>
+    </div>
+    <div class="day-toggle" id="dayToggle">
+      <button class="day-btn active" data-day="today">ഇന്ന്</button>
+      <button class="day-btn" data-day="tomorrow">നാളെ</button>
     </div>
     <p class="subline" id="dateLine">—</p>
     <p class="updated-line mono" id="lastSync">—</p>
@@ -708,7 +723,7 @@ svg.mini-shape{ width:100%; height:100%; }
 
   <div class="ad-bottom">
     <span class="ad-tag">പരസ്യം</span>
-    <a class="ad-bottom-frame" id="bottomAdLink" href="#" target="_blank" rel="noopener noreferrer">ഇവിടെ പരസ്യ ചിത്രം · 320 × 50px</a>
+    <a class="ad-bottom-frame" id="bottomAdLink" href="#" target="_blank" rel="noopener noreferrer">ഇവിടെ പരസ്യ ചിത്രം · 320 × 75px</a>
   </div>
 
   <p class="disclaimer">ഇവിടെ കാണിച്ചിരിക്കുന്ന വിവരങ്ങളിൽ മാറ്റം വന്നേക്കാം. അപ്ഡേറ്റ് സംബന്ധിച്ച പ്രശ്നങ്ങൾക്കോ പരസ്യം നൽകാനോ ബന്ധപ്പെടുക: <a href="mailto:hello@mazhaalert.in">hello@mazhaalert.in</a></p>
@@ -761,15 +776,22 @@ svg.mini-shape{ width:100%; height:100%; }
     <div class="edit-panel" id="editPanel" style="display:none;">
       <div class="edit-label mono">അലേർട്ട് നില മാറ്റുക</div>
       <div class="level-picker" id="levelPicker">
+        <div class="level-chip" data-level="white"><i style="background:var(--lvl-white)"></i>വെള്ള</div>
         <div class="level-chip" data-level="green"><i style="background:var(--lvl-green)"></i>പച്ച</div>
         <div class="level-chip" data-level="yellow"><i style="background:var(--lvl-yellow)"></i>മഞ്ഞ</div>
         <div class="level-chip" data-level="orange"><i style="background:var(--lvl-orange)"></i>ഓറഞ്ച്</div>
         <div class="level-chip" data-level="red"><i style="background:var(--lvl-red)"></i>റെഡ്</div>
       </div>
-      <div class="school-toggle-row">
-        <span>സ്കൂളുകൾക്ക് അവധി</span>
-        <div class="switch" id="schoolSwitch"><em></em></div>
+
+      <div class="edit-label mono" style="margin-top:16px;">സ്കൂൾ നില മാറ്റുക</div>
+      <div class="level-picker" id="schoolPicker">
+        <div class="level-chip" data-school="normal">പതിവ് പോലെ</div>
+        <div class="level-chip" data-school="holiday">അവധി</div>
+        <div class="level-chip" data-school="camp">ക്യാമ്പ് സ്കൂൾ</div>
+        <div class="level-chip" data-school="taluk">താലൂക്ക് അവധി</div>
       </div>
+
+      <p class="edit-note mono">ഈ മാറ്റം 12 മണിക്കൂർ നിലനിൽക്കും. വീണ്ടും തിരുത്തിയാൽ 12 മണിക്കൂർ പുതുതായി തുടങ്ങും — 12 മണിക്കൂർ കഴിഞ്ഞാൽ സ്വയമേവ 'വെള്ള' (മുന്നറിയിപ്പ് ഇല്ല) ആയി മാറും.</p>
     </div>
   </div>
 </div>
@@ -787,83 +809,118 @@ svg.mini-shape{ width:100%; height:100%; }
 
 <script>
 /* ============================================================
-   DATA — default alert values. Once opened, admins can also
-   edit level / school-leave live from the pencil icon in the
-   header; those edits are saved in this browser's storage.
-   level: "green" | "yellow" | "orange" | "red"
-   collector: leave "" if not set yet — the app shows a clean
-   placeholder instead of guessing.
-   schoolLeave: true/false
-   message: short bulletin line shown in the sheet
+   PRESETS — default alert values, separate for today and
+   tomorrow. Admins can also edit level / school status live
+   via the hidden PIN panel; those edits are saved in this
+   browser's storage and expire automatically (see below).
+   level: "white" | "green" | "yellow" | "orange" | "red"
+   school: "normal" | "holiday" | "camp" | "taluk"
    ============================================================ */
-const DATA = {
-  Kasaragod:          { level:"red",    collector:"", schoolLeave:true,  message:"കനത്ത മഴയ്ക്ക് റെഡ് അലേർട്ട് പ്രാബല്യത്തിൽ. താഴ്ന്ന പ്രദേശങ്ങളിലും മലയോര മേഖലകളിലും അധിക ജാഗ്രത പാലിക്കുക." },
-  Kannur:             { level:"orange", collector:"", schoolLeave:false, message:"ദിവസം മുഴുവൻ ശക്തമായ മഴ പ്രതീക്ഷിക്കുന്നു. പ്രാദേശിക വെള്ളക്കെട്ടിന് സാധ്യത." },
-  Wayanad:            { level:"red",    collector:"", schoolLeave:true,  message:"മലയോര മേഖലയിൽ ഉരുൾപൊട്ടൽ സാധ്യതയുള്ളതിനാൽ റെഡ് അലേർട്ട്. അനാവശ്യ യാത്രകൾ ഒഴിവാക്കുക." },
-  Kozhikode:          { level:"yellow", collector:"", schoolLeave:false, message:"ഒറ്റപ്പെട്ട ശക്തമായ മഴയ്ക്ക് സാധ്യത. തുടർന്നും ജാഗ്രത പാലിക്കുക." },
-  Malappuram:         { level:"orange", collector:"", schoolLeave:false, message:"കിഴക്കൻ പ്രദേശങ്ങളിൽ ശക്തമായ മഴ പ്രവചനം. തയ്യാറെടുപ്പ് ആവശ്യമാണ്." },
-  Palakkad:           { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല. കാലാവസ്ഥ സാധാരണ നിലയിലാകും." },
-  Thrissur:           { level:"yellow", collector:"", schoolLeave:false, message:"ഉച്ചയ്ക്ക് ശേഷം മിതമായതും ശക്തവുമായ മഴ സാധ്യത." },
-  Ernakulam:          { level:"orange", collector:"", schoolLeave:false, message:"ജില്ലയിൽ ശക്തമായ മഴയ്ക്ക് അലേർട്ട്. കായൽ തീരങ്ങളിലെ താഴ്ന്ന പ്രദേശങ്ങൾ ജാഗ്രത പാലിക്കുക." },
-  Alappuzha:          { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല." },
-  Pathanamthitta:     { level:"yellow", collector:"", schoolLeave:false, message:"മലയോര മേഖലയിൽ ഒറ്റപ്പെട്ട ശക്തമായ മഴയ്ക്ക് സാധ്യത." },
-  Kottayam:           { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല." },
-  Idukki:             { level:"red",    collector:"", schoolLeave:true,  message:"മലയോര മേഖലകളിൽ ഉരുൾപൊട്ടലിനും പെട്ടെന്നുള്ള വെള്ളപ്പൊക്കത്തിനും സാധ്യത കൂടുതൽ. യാത്ര ഒഴിവാക്കുക." },
-  Kollam:             { level:"yellow", collector:"", schoolLeave:false, message:"ദിവസം മുഴുവൻ ജാഗ്രത പാലിക്കേണ്ട സാഹചര്യം." },
-  Thiruvananthapuram: { level:"green",  collector:"", schoolLeave:false, message:"നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല." }
+const COLLECTORS = {
+  Kasaragod:"", Kannur:"", Wayanad:"", Kozhikode:"", Malappuram:"", Palakkad:"",
+  Thrissur:"", Ernakulam:"", Alappuzha:"", Pathanamthitta:"", Kottayam:"",
+  Idukki:"", Kollam:"", Thiruvananthapuram:""
 };
 
-/* ---- manual edits auto-expire after 24 hours, reverting to green ----
-   Only admin-made edits are timestamped and tracked here. The
-   preset values above are unaffected and stay as coded. */
-const EDIT_KEY = "mazhaalert_edits_v2";
-const EXPIRY_MS = 24 * 60 * 60 * 1000;
-const DEFAULT_MESSAGE = "നിലവിൽ മുന്നറിയിപ്പ് ഒന്നും ഇല്ല.";
-let EDITS = {};
+const PRESETS = {
+  today: {
+    Kasaragod:{ level:"red",    school:"holiday" },
+    Kannur:{ level:"orange", school:"normal" },
+    Wayanad:{ level:"red",    school:"holiday" },
+    Kozhikode:{ level:"yellow", school:"normal" },
+    Malappuram:{ level:"orange", school:"normal" },
+    Palakkad:{ level:"green",  school:"normal" },
+    Thrissur:{ level:"yellow", school:"normal" },
+    Ernakulam:{ level:"orange", school:"normal" },
+    Alappuzha:{ level:"green",  school:"normal" },
+    Pathanamthitta:{ level:"yellow", school:"normal" },
+    Kottayam:{ level:"green",  school:"normal" },
+    Idukki:{ level:"red",    school:"holiday" },
+    Kollam:{ level:"yellow", school:"normal" },
+    Thiruvananthapuram:{ level:"green",  school:"normal" }
+  },
+  tomorrow: {
+    Kasaragod:{ level:"yellow", school:"normal" },
+    Kannur:{ level:"yellow", school:"normal" },
+    Wayanad:{ level:"orange", school:"normal" },
+    Kozhikode:{ level:"green",  school:"normal" },
+    Malappuram:{ level:"yellow", school:"normal" },
+    Palakkad:{ level:"white",  school:"normal" },
+    Thrissur:{ level:"green",  school:"normal" },
+    Ernakulam:{ level:"green",  school:"normal" },
+    Alappuzha:{ level:"white",  school:"normal" },
+    Pathanamthitta:{ level:"green",  school:"normal" },
+    Kottayam:{ level:"white",  school:"normal" },
+    Idukki:{ level:"orange", school:"normal" },
+    Kollam:{ level:"green",  school:"normal" },
+    Thiruvananthapuram:{ level:"white",  school:"normal" }
+  }
+};
+
+const DATA = { today:{}, tomorrow:{} };
+["today","tomorrow"].forEach(day=>{
+  Object.keys(PRESETS[day]).forEach(id=>{ DATA[day][id] = { ...PRESETS[day][id] }; });
+});
+
+/* ---- manual edits auto-expire 12 hours after the edit was made,
+   then revert to white (no warning). Today and tomorrow are
+   tracked and expire independently, each counting 12 hours from
+   its own last edit. Only admin-made edits are timestamped here —
+   the presets above are unaffected and stay as coded. */
+const EDIT_KEY = "mazhaalert_edits_v3";
+const EXPIRY_MS = 12 * 60 * 60 * 1000;
+let EDITS = { today:{}, tomorrow:{} };
 
 function loadEdits(){
-  try{ EDITS = JSON.parse(localStorage.getItem(EDIT_KEY) || "{}"); }
-  catch(e){ EDITS = {}; }
+  try{
+    const parsed = JSON.parse(localStorage.getItem(EDIT_KEY) || "{}");
+    EDITS = { today: parsed.today || {}, tomorrow: parsed.tomorrow || {} };
+  }catch(e){ EDITS = { today:{}, tomorrow:{} }; }
 }
-function saveEdits(){
-  try{ localStorage.setItem(EDIT_KEY, JSON.stringify(EDITS)); }catch(e){}
-}
-/* apply any still-valid edits on top of the presets; drop expired ones */
-function applyEdits(){
+function saveEdits(){ try{ localStorage.setItem(EDIT_KEY, JSON.stringify(EDITS)); }catch(e){} }
+
+function applyEditsForDay(day){
   let changed = false;
-  Object.keys(EDITS).forEach(id=>{
-    if(!DATA[id]) return;
-    const e = EDITS[id];
+  Object.keys(EDITS[day]).forEach(id=>{
+    if(!DATA[day][id]) return;
+    const e = EDITS[day][id];
     if(Date.now() - e.updatedAt > EXPIRY_MS){
-      delete EDITS[id];
+      delete EDITS[day][id];
       changed = true;
-      DATA[id].level = "green";
-      DATA[id].schoolLeave = false;
-      DATA[id].message = DEFAULT_MESSAGE;
+      DATA[day][id].level = "white";
+      DATA[day][id].school = "normal";
     } else {
-      DATA[id].level = e.level;
-      DATA[id].schoolLeave = e.schoolLeave;
+      DATA[day][id].level = e.level;
+      DATA[day][id].school = e.school;
     }
   });
   if(changed) saveEdits();
   return changed;
 }
-function setEdit(id, level, schoolLeave){
-  EDITS[id] = { level, schoolLeave, updatedAt: Date.now() };
-  DATA[id].level = level;
-  DATA[id].schoolLeave = schoolLeave;
+function applyAllEdits(){
+  const a = applyEditsForDay("today");
+  const b = applyEditsForDay("tomorrow");
+  return a || b;
+}
+function setEdit(day, id, level, school){
+  EDITS[day][id] = { level, school, updatedAt: Date.now() };
+  DATA[day][id].level = level;
+  DATA[day][id].school = school;
   saveEdits();
 }
 
 loadEdits();
-applyEdits();
+applyAllEdits();
 /* re-check every few minutes so a district reverts live, without reload */
 setInterval(()=>{
-  if(applyEdits()){
-    Object.keys(DATA).forEach(repaintDistrict);
+  if(applyAllEdits()){
+    repaintAll();
     if(activeEl) openSheet(activeEl);
   }
 }, 5 * 60 * 1000);
+
+let currentDay = "today";
+function activeData(){ return DATA[currentDay]; }
 
 const NAMES_ML = {
   Kasaragod:"കാസർകോട്", Kannur:"കണ്ണൂർ", Wayanad:"വയനാട്", Kozhikode:"കോഴിക്കോട്",
@@ -873,21 +930,34 @@ const NAMES_ML = {
 };
 
 const LEVEL_META = {
-  green:  { label:"മുന്നറിയിപ്പ് ഇല്ല",                      intensity:"നേരിയ തോതിലുള്ള മഴ",                              mm:"15.6 – 64.4 മി.മീ" },
+  white:  { label:"മുന്നറിയിപ്പ് ഇല്ല",                              intensity:"മഴ ഇല്ല",                                          mm:"ചാറ്റൽ മഴ സാധ്യത 2.5 – 15.5 മി.മീ" },
+  green:  { label:"മുന്നറിയിപ്പ് ഇല്ല",                              intensity:"നേരിയ തോതിലുള്ള മഴ",                              mm:"15.6 – 64.4 മി.മീ" },
   yellow: { label:"നിരീക്ഷിക്കുക (മുന്നറിയിപ്പ് പുറപ്പെടുവിക്കുക)", intensity:"ശക്തമായ മഴ",                                     mm:"64.5 – 115.5 മി.മീ" },
-  orange: { label:"ജാഗ്രത പാലിക്കുക (കരുതിയിരിക്കുക)",       intensity:"ശക്തമായതോ അതിശക്തമായതോ ആയ മഴ",                    mm:"115.6 – 204.4 മി.മീ" },
-  red:    { label:"മുന്നറിയിപ്പ് (പ്രവർത്തിക്കുക)",           intensity:"അതി ശക്തമായതോ അതിതീവ്രമായതോ ആയ മഴ",              mm:"204.4 മി.മീ യിൽ കൂടുതൽ" }
+  orange: { label:"ജാഗ്രത പാലിക്കുക (കരുതിയിരിക്കുക)",              intensity:"ശക്തമായതോ അതിശക്തമായതോ ആയ മഴ",                    mm:"115.6 – 204.4 മി.മീ" },
+  red:    { label:"മുന്നറിയിപ്പ് (പ്രവർത്തിക്കുക)",                  intensity:"അതി ശക്തമായതോ അതിതീവ്രമായതോ ആയ മഴ",              mm:"204.4 മി.മീ യിൽ കൂടുതൽ" }
+};
+
+const SCHOOL_META = {
+  normal:  { label:"സ്കൂളുകൾ പതിവ് പോലെ പ്രവർത്തിക്കുന്നു",        chip:"off"   },
+  holiday: { label:"സ്കൂളുകൾക്ക് അവധി",                              chip:"on"    },
+  camp:    { label:"സ്കൂൾ ദുരിതാശ്വാസ ക്യാമ്പായി പ്രവർത്തിക്കുന്നു", chip:"camp"  },
+  taluk:   { label:"താലൂക്ക് അടിസ്ഥാനത്തിൽ സ്കൂളുകൾക്ക് അവധി",       chip:"taluk" }
 };
 
 /* ---------- paint the map ---------- */
 const svgNS = "http://www.w3.org/2000/svg";
 const shapes = document.querySelectorAll(".district");
-shapes.forEach(el=>{
-  const d = DATA[el.id];
-  if(!d) return;
+const LEVEL_ORDER = ["white","green","yellow","orange","red"];
+function repaintDistrict(id){
+  const el = document.getElementById(id);
+  const d = activeData()[id];
+  if(!el || !d) return;
+  LEVEL_ORDER.forEach(l=>el.classList.remove("lvl-"+l));
   el.classList.add("lvl-"+d.level);
-  el.setAttribute("aria-label", el.id + " — " + LEVEL_META[d.level].label);
-});
+  el.setAttribute("aria-label", id + " — " + LEVEL_META[d.level].label);
+}
+function repaintAll(){ shapes.forEach(el=>repaintDistrict(el.id)); }
+repaintAll();
 
 /* ---------- district name labels, sized to each shape ---------- */
 const mapSvg = document.getElementById("mapSvg");
@@ -914,9 +984,26 @@ shapes.forEach(el=>{
   labelLayer.appendChild(text);
 });
 
-/* ---------- header ---------- */
-document.getElementById("dateLine").textContent = new Date().toLocaleDateString("ml-IN",{ weekday:"long", day:"numeric", month:"long" });
+/* ---------- header: date + today/tomorrow toggle ---------- */
+function updateDateLine(){
+  const d = new Date();
+  if(currentDay === "tomorrow") d.setDate(d.getDate() + 1);
+  document.getElementById("dateLine").textContent = d.toLocaleDateString("ml-IN",{ weekday:"long", day:"numeric", month:"long" });
+}
+updateDateLine();
 document.getElementById("lastSync").textContent = "അപ്ഡേറ്റ് ചെയ്തത് " + new Date().toLocaleTimeString("ml-IN",{hour:"2-digit",minute:"2-digit"});
+
+const dayToggle = document.getElementById("dayToggle");
+dayToggle.addEventListener("click", e=>{
+  const btn = e.target.closest(".day-btn");
+  if(!btn || btn.dataset.day === currentDay) return;
+  currentDay = btn.dataset.day;
+  dayToggle.querySelectorAll(".day-btn").forEach(b=>b.classList.toggle("active", b===btn));
+  repaintAll();
+  updateDateLine();
+  if(activeEl) openSheet(activeEl);
+});
+
 
 /* ---------- sheet elements ---------- */
 const backdrop   = document.getElementById("backdrop");
@@ -982,28 +1069,22 @@ document.getElementById("pinCancel").addEventListener("click", closePinModal);
 pinBackdrop.addEventListener("click", closePinModal);
 pinInput.addEventListener("keydown", e=>{ if(e.key === "Enter") tryPin(); });
 
-const LEVEL_ORDER = ["green","yellow","orange","red"];
-function repaintDistrict(id){
-  const el = document.getElementById(id);
-  const d = DATA[id];
-  LEVEL_ORDER.forEach(l=>el.classList.remove("lvl-"+l));
-  el.classList.add("lvl-"+d.level);
-  el.setAttribute("aria-label", id + " — " + LEVEL_META[d.level].label);
-}
-
 document.getElementById("levelPicker").addEventListener("click", e=>{
   const chip = e.target.closest(".level-chip");
   if(!chip || !activeEl) return;
   const id = activeEl.id;
-  setEdit(id, chip.dataset.level, DATA[id].schoolLeave);
+  const d = activeData()[id];
+  setEdit(currentDay, id, chip.dataset.level, d.school);
   repaintDistrict(id);
   openSheet(activeEl);
 });
 
-document.getElementById("schoolSwitch").addEventListener("click", ()=>{
-  if(!activeEl) return;
+document.getElementById("schoolPicker").addEventListener("click", e=>{
+  const chip = e.target.closest(".level-chip");
+  if(!chip || !activeEl) return;
   const id = activeEl.id;
-  setEdit(id, DATA[id].level, !DATA[id].schoolLeave);
+  const d = activeData()[id];
+  setEdit(currentDay, id, d.level, chip.dataset.school);
   openSheet(activeEl);
 });
 
@@ -1044,7 +1125,7 @@ function fieldRow(id, value, isLink){
 
 function openSheet(el){
   const id = el.id;
-  const d = DATA[id];
+  const d = activeData()[id];
   if(!d) return;
 
   if(activeEl) activeEl.classList.remove("is-active");
@@ -1065,23 +1146,29 @@ function openSheet(el){
 
   document.getElementById("sheetName").textContent = NAMES_ML[id] || id;
 
-  fieldRow("sheetCollector", d.collector, false);
+  fieldRow("sheetCollector", COLLECTORS[id], false);
 
-  const schoolNode = document.getElementById("sheetSchool");
-  schoolNode.innerHTML = d.schoolLeave
-    ? '<span class="chip on">ഇന്ന് സ്കൂളുകൾക്ക് അവധി</span>'
-    : '<span class="chip off">സ്കൂളുകൾ പതിവ് പോലെ പ്രവർത്തിക്കുന്നു</span>';
+  const schoolMeta = SCHOOL_META[d.school] || SCHOOL_META.normal;
+  document.getElementById("sheetSchool").innerHTML =
+    '<span class="chip '+schoolMeta.chip+'">'+schoolMeta.label+'</span>';
 
   miniIcon(el, computedColor);
 
   document.getElementById("editPanel").style.display = adminMode ? "block" : "none";
-  document.querySelectorAll(".level-chip").forEach(chip=>{
-    chip.classList.toggle("selected", chip.dataset.level === d.level);
-    chip.style.color = chip.dataset.level === d.level
+  document.querySelectorAll("#levelPicker .level-chip").forEach(chip=>{
+    const on = chip.dataset.level === d.level;
+    chip.classList.toggle("selected", on);
+    chip.style.color = on
       ? getComputedStyle(document.documentElement).getPropertyValue("--lvl-"+chip.dataset.level).trim()
       : "";
   });
-  document.getElementById("schoolSwitch").classList.toggle("on", !!d.schoolLeave);
+  document.querySelectorAll("#schoolPicker .level-chip").forEach(chip=>{
+    const on = chip.dataset.school === d.school;
+    chip.classList.toggle("selected", on);
+    chip.style.color = on
+      ? getComputedStyle(document.documentElement).getPropertyValue("--sch-"+chip.dataset.school).trim()
+      : "";
+  });
 
   backdrop.classList.add("show");
   sheet.classList.add("show");
@@ -1136,24 +1223,7 @@ document.getElementById("bottomAdLink").href = AD_LINK_BOTTOM;
 
 /* ---------- opening splash / ad ---------- */
 const splash = document.getElementById("splash");
-const adSkip = document.getElementById("adSkip");
-let count = 5;
-adSkip.textContent = count;
-const countdown = setInterval(()=>{
-  count -= 1;
-  if(count > 0){
-    adSkip.textContent = count;
-  } else {
-    clearInterval(countdown);
-    adSkip.disabled = false;
-    adSkip.classList.add("ready");
-    adSkip.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
-  }
-}, 1000);
-adSkip.addEventListener("click", ()=>{
-  if(adSkip.disabled) return;
-  splash.classList.add("hide");
-});
+setTimeout(()=>{ splash.classList.add("hide"); }, 5000);
 
 </script>
 </body>
