@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>മഴ അലേർട്ട് | Mazha Alert</title>
+<title>Mazha Alert</title>
 <meta name="description" content="കേരളത്തിലെ 14 ജില്ലകളിലെ തത്സമയ മഴ അലേർട്ട് നില (പച്ച/മഞ്ഞ/ഓറഞ്ച്/റെഡ്), സ്കൂൾ അവധി വിവരങ്ങൾ, ജില്ലാ കളക്ടർ വിവരങ്ങൾ എന്നിവ ഒറ്റ നോട്ടത്തിൽ അറിയാം.">
 <meta name="theme-color" content="#0B1614">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -826,7 +826,7 @@ const COLLECTORS = {
 
 const PRESETS = {
   today: {
-    Kasaragod:{ level:"red",    school:"holiday" },
+    Kasaragod:{ level:"white",    school:"normal" },
     Kannur:{ level:"orange", school:"normal" },
     Wayanad:{ level:"red",    school:"holiday" },
     Kozhikode:{ level:"yellow", school:"normal" },
@@ -1219,7 +1219,7 @@ handle.addEventListener("touchend", e=>onEnd(e.changedTouches[0].clientY));
    Edit these two URLs to wherever each ad image should lead.
    The whole image area is tappable, with no visible link styling. */
 const AD_LINK_SPLASH = "https://example.com";
-const AD_LINK_BOTTOM = "https://example.com";
+const AD_LINK_BOTTOM = "https://milma.com";
 document.getElementById("splashAdLink").href = AD_LINK_SPLASH;
 document.getElementById("bottomAdLink").href = AD_LINK_BOTTOM;
 
