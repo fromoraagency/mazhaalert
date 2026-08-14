@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mazha Alert</title>
+<title>മഴ അലേർട്ട് | Kerala Rain Alert — ജില്ല തിരിച്ചുള്ള മഴ മുന്നറിയിപ്പ്</title>
 <meta name="description" content="കേരളത്തിലെ 14 ജില്ലകളിലെ തത്സമയ മഴ അലേർട്ട് നില (പച്ച/മഞ്ഞ/ഓറഞ്ച്/റെഡ്), സ്കൂൾ അവധി വിവരങ്ങൾ, ജില്ലാ കളക്ടർ വിവരങ്ങൾ എന്നിവ ഒറ്റ നോട്ടത്തിൽ അറിയാം.">
 <meta name="theme-color" content="#0B1614">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -339,58 +339,28 @@ svg.mini-shape{ width:100%; height:100%; }
 .sheet{ position:fixed; }
 .sheet-close svg{ width:14px; height:14px; }
 
-/* ---- edit panel (admin mode) ---- */
-.edit-panel{
-  margin-top:16px;
-  padding:14px;
-  border:1px dashed var(--line-2);
-  border-radius:14px;
-  background:rgba(201,162,39,0.05);
-}
-.edit-panel .edit-label{
-  font-size:11px; color:var(--brass); letter-spacing:.03em;
-  margin-bottom:9px;
-}
-.level-picker{ display:flex; gap:7px; flex-wrap:wrap; }
-.level-chip{
-  flex:1; min-width:64px;
-  display:flex; align-items:center; justify-content:center; gap:5px;
-  padding:9px 6px; border-radius:10px;
-  border:1.5px solid var(--line-2);
-  background:rgba(255,255,255,0.03);
-  color:var(--muted);
-  font-size:11.5px; cursor:pointer;
-}
-.level-chip i{ width:8px; height:8px; border-radius:50%; flex:none; }
-.level-chip.selected{ color:var(--ink); border-color:currentColor; background:rgba(255,255,255,0.06); }
-.edit-note{
-  margin-top:14px;
-  font-size:10.5px; line-height:1.5; color:var(--faint);
-}
-
 /* ---- bottom ad bar ---- */
 .ad-bottom{
   flex:none;
   margin:8px 16px 6px;
-  padding:10px;
-  border:1px solid var(--line-2);
-  border-radius:16px;
-  background:rgba(255,255,255,0.025);
-  position:relative;
 }
-.ad-bottom .ad-tag{
-  position:absolute; top:-9px; left:12px;
-  font-size:9.5px; padding:2px 8px; border-radius:100px;
-  background:var(--bg); border:1px solid var(--line-2);
-  color:var(--faint); letter-spacing:.05em;
+.ad-caption{
+  display:block;
+  font-size:9.5px; letter-spacing:.05em;
+  color:var(--faint);
+  text-align:center;
+  margin-bottom:6px;
 }
 .ad-bottom-frame{
-  height:75px; width:100%; min-width:280px; border-radius:11px;
-  border:1px dashed var(--line-2);
-  display:flex; align-items:center; justify-content:center;
-  font-size:11.5px; color:var(--faint);
-  text-align:center; padding:0 10px;
-  text-decoration:none; cursor:pointer;
+  display:block;
+  height:75px; width:100%;
+  border-radius:14px;
+  border:1px solid var(--line-2);
+  overflow:hidden;
+  cursor:pointer;
+}
+.ad-bottom-frame svg, .ad-bottom-frame img{
+  display:block; width:100%; height:100%; object-fit:cover;
 }
 
 /* ============================================================
@@ -416,27 +386,18 @@ svg.mini-shape{ width:100%; height:100%; }
 .brand-name{ font-size:30px; font-weight:700; letter-spacing:-0.01em; color:var(--ink); }
 .brand-tag{ font-size:12px; color:var(--muted); margin-top:-6px; }
 
-.ad-box{
-  width:100%; position:relative;
-  padding:10px;
-  border:1px solid var(--line-2);
-  border-radius:20px;
-  background:rgba(255,255,255,0.025);
-}
-.ad-box .ad-tag{
-  position:absolute; top:-9px; left:14px;
-  font-size:9.5px; padding:2px 8px; border-radius:100px;
-  background:var(--bg); border:1px solid var(--line-2);
-  color:var(--faint); letter-spacing:.05em;
-}
+.ad-slot{ width:100%; }
 .ad-box-frame{
+  display:block;
   width:100%; max-width:300px; height:250px;
   margin:0 auto;
-  border-radius:14px;
-  border:1px dashed var(--line-2);
-  display:flex; align-items:center; justify-content:center;
-  font-size:13px; color:var(--faint); text-align:center; padding:0 20px;
-  text-decoration:none; cursor:pointer;
+  border-radius:16px;
+  border:1px solid var(--line-2);
+  overflow:hidden;
+  cursor:pointer;
+}
+.ad-box-frame svg, .ad-box-frame img{
+  display:block; width:100%; height:100%; object-fit:cover;
 }
 .ad-spinner{
   margin-top:20px;
@@ -447,51 +408,6 @@ svg.mini-shape{ width:100%; height:100%; }
   animation:spin 0.8s linear infinite;
 }
 @keyframes spin{ to{ transform:rotate(360deg); } }
-
-/* ---- PIN unlock modal ---- */
-.pin-backdrop{
-  position:fixed; inset:0; z-index:60;
-  background:rgba(5,10,9,0.65);
-  opacity:0; pointer-events:none;
-  transition:opacity .22s var(--ease);
-}
-.pin-backdrop.show{ opacity:1; pointer-events:auto; }
-.pin-modal{
-  position:fixed; left:50%; top:50%; z-index:61;
-  transform:translate(-50%,-46%) scale(0.96);
-  opacity:0; pointer-events:none;
-  transition:opacity .22s var(--ease), transform .22s var(--ease);
-  width:calc(100% - 64px); max-width:300px;
-  background:linear-gradient(180deg,var(--surface-2),var(--surface));
-  border:1px solid var(--line-2);
-  border-radius:20px;
-  box-shadow:var(--shadow);
-  padding:22px 20px;
-  text-align:center;
-}
-.pin-modal.show{ opacity:1; pointer-events:auto; transform:translate(-50%,-50%) scale(1); }
-.pin-label{ font-size:13px; color:var(--muted); margin:0 0 14px; line-height:1.4; }
-#pinInput{
-  width:100%;
-  font-family:'Manjari',sans-serif; font-weight:700;
-  font-size:26px; letter-spacing:12px; text-align:center;
-  padding:12px 0 12px 12px;
-  border-radius:12px;
-  border:1.5px solid var(--line-2);
-  background:rgba(255,255,255,0.04);
-  color:var(--ink);
-  outline:none;
-}
-#pinInput:focus{ border-color:var(--brass); }
-.pin-error{ font-size:12px; color:var(--lvl-red); margin:10px 0 0; display:none; }
-.pin-error.show{ display:block; }
-.pin-actions{ display:flex; gap:10px; margin-top:16px; }
-.pin-btn{
-  flex:1; padding:11px 0; border-radius:12px;
-  font-size:14px; cursor:pointer; border:1.5px solid var(--line-2);
-}
-.pin-btn.ghost{ background:transparent; color:var(--muted); }
-.pin-btn.solid{ background:var(--brass); border-color:var(--brass); color:#0B1614; }
 
 .disclaimer{
   flex:none;
@@ -514,15 +430,15 @@ svg.mini-shape{ width:100%; height:100%; }
 <div class="splash" id="splash" role="dialog" aria-modal="true" aria-label="Opening">
   <div class="splash-inner">
     <div class="brand">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-rain-wind-icon lucide-cloud-rain-wind"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m9.2 22 3-7"/><path d="m9 13-3 7"/><path d="m17 13-3 7"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 17a4.5 4.5 0 0 0 0-9 6 6 0 0 0-11.4-1.8A5 5 0 0 0 6.5 16"/><path d="M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg>
       <h1 class="brand-name">മഴഅലേർട്ട്</h1>
-      <p class="brand-tag mono">ജില്ലാ അടിസ്ഥാന മഴ മുന്നറിയിപ്പ്</p>
+      <p class="brand-tag mono">കേരള സംസ്ഥാന മഴ മുന്നറിയിപ്പ്</p>
     </div>
-    <div class="ad-box">
-      <span class="ad-tag">പരസ്യം</span>
+    <div class="ad-slot">
+      <span class="ad-caption mono">പരസ്യം</span>
       <a class="ad-box-frame" id="splashAdLink" href="#" target="_blank" rel="noopener noreferrer">
-  <img src="/main ad.jpg" alt="പരസ്യം" style="width:100%;height:100%;object-fit:cover;border-radius:14px;">
-</a>
+        <img src="https://placehold.co/300x250/12211F/C9A227?text=Ad+300x250" alt="പരസ്യം">
+      </a>
     </div>
     <div class="ad-spinner" id="adSpinner" aria-hidden="true"></div>
   </div>
@@ -533,7 +449,7 @@ svg.mini-shape{ width:100%; height:100%; }
   <header class="header">
     <div class="rain"></div>
     <div class="header-row">
-      <h1 id="titleTap">മഴ അലേർട്ട്</h1>
+      <h1>മഴ അലേർട്ട്</h1>
     </div>
     <div class="day-toggle" id="dayToggle">
       <button class="day-btn active" data-day="today">ഇന്ന്</button>
@@ -724,13 +640,13 @@ svg.mini-shape{ width:100%; height:100%; }
   </main>
 
   <div class="ad-bottom">
-    <span class="ad-tag">പരസ്യം</span>
+    <span class="ad-caption mono">പരസ്യം</span>
     <a class="ad-bottom-frame" id="bottomAdLink" href="#" target="_blank" rel="noopener noreferrer">
-  <img src="bottom ad.jpg" alt="പരസ്യം" style="width:100%;height:100%;object-fit:cover;border-radius:11px;">
-</a>
+      <img src="https://placehold.co/320x75/12211F/C9A227?text=Ad+320x75" alt="പരസ്യം">
+    </a>
   </div>
 
-  <p class="disclaimer">ഇവിടെ കാണിച്ചിരിക്കുന്ന വിവരങ്ങളിൽ മാറ്റം വന്നേക്കാം. അപ്ഡേറ്റ് സംബന്ധിച്ച പ്രശ്നങ്ങൾക്കോ പരസ്യം നൽകാനോ ബന്ധപ്പെടുക: <a href="mailto:fromora.agency@gmail.com">fromora.agency@gmail.com</a></p>
+  <p class="disclaimer">ഇവിടെ കാണിച്ചിരിക്കുന്ന വിവരങ്ങളിൽ മാറ്റം വന്നേക്കാം. അപ്ഡേറ്റ് സംബന്ധിച്ച പ്രശ്നങ്ങൾക്കോ പരസ്യം നൽകാനോ ബന്ധപ്പെടുക: <a href="mailto:hello@mazhaalert.in">hello@mazhaalert.in</a></p>
 </div>
 
 <div class="backdrop" id="backdrop"></div>
@@ -762,7 +678,7 @@ svg.mini-shape{ width:100%; height:100%; }
 
     <div class="rows">
       <div class="row">
-        <div class="ico"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round-icon lucide-user-round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 12 2a7 7 0 0 1 7 7.5C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/></svg></div>
         <div class="txt">
           <div class="label">ജില്ലാ കളക്ടർ</div>
           <div class="value" id="sheetCollector">—</div>
@@ -776,152 +692,59 @@ svg.mini-shape{ width:100%; height:100%; }
         </div>
       </div>
     </div>
-
-    <div class="edit-panel" id="editPanel" style="display:none;">
-      <div class="edit-label mono">അലേർട്ട് നില മാറ്റുക</div>
-      <div class="level-picker" id="levelPicker">
-        <div class="level-chip" data-level="white"><i style="background:var(--lvl-white)"></i>വെള്ള</div>
-        <div class="level-chip" data-level="green"><i style="background:var(--lvl-green)"></i>പച്ച</div>
-        <div class="level-chip" data-level="yellow"><i style="background:var(--lvl-yellow)"></i>മഞ്ഞ</div>
-        <div class="level-chip" data-level="orange"><i style="background:var(--lvl-orange)"></i>ഓറഞ്ച്</div>
-        <div class="level-chip" data-level="red"><i style="background:var(--lvl-red)"></i>റെഡ്</div>
-      </div>
-
-      <div class="edit-label mono" style="margin-top:16px;">സ്കൂൾ നില മാറ്റുക</div>
-      <div class="level-picker" id="schoolPicker">
-        <div class="level-chip" data-school="normal">പതിവ് പോലെ</div>
-        <div class="level-chip" data-school="holiday">അവധി</div>
-        <div class="level-chip" data-school="camp">ക്യാമ്പ് സ്കൂൾ</div>
-        <div class="level-chip" data-school="taluk">താലൂക്ക് അവധി</div>
-      </div>
-
-      <p class="edit-note mono">ഈ മാറ്റം 12 മണിക്കൂർ നിലനിൽക്കും. വീണ്ടും തിരുത്തിയാൽ 12 മണിക്കൂർ പുതുതായി തുടങ്ങും — 12 മണിക്കൂർ കഴിഞ്ഞാൽ സ്വയമേവ 'വെള്ള' (മുന്നറിയിപ്പ് ഇല്ല) ആയി മാറും.</p>
-    </div>
-  </div>
-</div>
-
-<div class="pin-backdrop" id="pinBackdrop"></div>
-<div class="pin-modal" id="pinModal" role="dialog" aria-modal="true" aria-hidden="true">
-  <p class="pin-label">എഡിറ്റ് മോഡ് തുറക്കാൻ PIN നൽകുക</p>
-  <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="pinInput" autocomplete="off">
-  <p class="pin-error" id="pinError">തെറ്റായ PIN, വീണ്ടും ശ്രമിക്കുക</p>
-  <div class="pin-actions">
-    <button class="pin-btn ghost" id="pinCancel">റദ്ദാക്കുക</button>
-    <button class="pin-btn solid" id="pinConfirm">ശരി</button>
   </div>
 </div>
 
 <script>
 /* ============================================================
-   PRESETS — default alert values, separate for today and
-   tomorrow. Admins can also edit level / school status live
-   via the hidden PIN panel; those edits are saved in this
-   browser's storage and expire automatically (see below).
-   level: "white" | "green" | "yellow" | "orange" | "red"
+   DATA — edit alert levels and school status directly here,
+   separately for today and tomorrow. No in-app editing UI —
+   change the values below and re-upload the file.
+   level:  "white" | "green" | "yellow" | "orange" | "red"
    school: "normal" | "holiday" | "camp" | "taluk"
    ============================================================ */
 const COLLECTORS = {
-  Kasaragod:"അർജുൻ പാണ്ഡ്യൻ, IAS", Kannur:"വിഷ്ണുരാജ് പി, IAS", Wayanad:"Dr.മേഘശ്രീ, IAS", Kozhikode:"മാധവിക്കുട്ടി എം.എസ്, IAS", Malappuram:"Dr.വിനയ് ഗോയൽ, IAS", Palakkad:"കെ. സുധീർ, IAS",
-  Thrissur:"ശിഖ സുരേന്ദ്രൻ, IAS", Ernakulam:"പ്രിയങ്ക ജി, IAS", Alappuzha:"ഷാജി വി. നായർ, IAS", Pathanamthitta:"നിസാമുദ്ദീൻ, IAS", Kottayam:"ചേതൻ കുമാർ മീന, IAS",
-  Idukki:"Dr.ദിനേശൻ ചെറുവോട്ട്, IAS", Kollam:"ആനി ജൂല തോമസ്, IAS", Thiruvananthapuram:"അനു കുമാരി, IAS"
+Kasaragod:"അർജുൻ പാണ്ഡ്യൻ, IAS", Kannur:"വിഷ്ണുരാജ് പി, IAS", Wayanad:"Dr.മേഘശ്രീ, IAS",
+   Kozhikode:"മാധവിക്കുട്ടി എം.എസ്, IAS", Malappuram:"Dr.വിനയ് ഗോയൽ, IAS", Palakkad:"കെ. സുധീർ, IAS", 
+   Thrissur:"ശിഖ സുരേന്ദ്രൻ, IAS", Ernakulam:"പ്രിയങ്ക ജി, IAS", Alappuzha:"ഷാജി വി. നായർ, IAS", 
+   Pathanamthitta:"നിസാമുദ്ദീൻ, IAS", Kottayam:"ചേതൻ കുമാർ മീന, IAS", Idukki:"Dr.ദിനേശൻ ചെറുവോട്ട്, IAS",
+   Kollam:"ആനി ജൂല തോമസ്, IAS", Thiruvananthapuram:"അനു കുമാരി, IAS"
 };
 
-const PRESETS = {
+const DATA = {
   today: {
-    Kasaragod:{ level:"white",    school:"normal" },
-    Kannur:{ level:"white", school:"normal" },
-    Wayanad:{ level:"white",    school:"normal" },
-    Kozhikode:{ level:"white", school:"normal" },
-    Malappuram:{ level:"white", school:"normal" },
-    Palakkad:{ level:"white",  school:"normal" },
-    Thrissur:{ level:"white", school:"normal" },
-    Ernakulam:{ level:"white", school:"normal" },
-    Alappuzha:{ level:"white",  school:"normal" },
-    Pathanamthitta:{ level:"white", school:"normal" },
-    Kottayam:{ level:"white",  school:"normal" },
-    Idukki:{ level:"white",    school:"normal" },
-    Kollam:{ level:"white", school:"normal" },
-    Thiruvananthapuram:{ level:"white",  school:"normal" }
+    Kasaragod:{ level:"red",    school:"holiday" },
+    Kannur:{ level:"orange", school:"normal" },
+    Wayanad:{ level:"red",    school:"holiday" },
+    Kozhikode:{ level:"yellow", school:"normal" },
+    Malappuram:{ level:"orange", school:"normal" },
+    Palakkad:{ level:"green",  school:"normal" },
+    Thrissur:{ level:"yellow", school:"normal" },
+    Ernakulam:{ level:"orange", school:"normal" },
+    Alappuzha:{ level:"green",  school:"normal" },
+    Pathanamthitta:{ level:"yellow", school:"normal" },
+    Kottayam:{ level:"green",  school:"normal" },
+    Idukki:{ level:"red",    school:"holiday" },
+    Kollam:{ level:"yellow", school:"normal" },
+    Thiruvananthapuram:{ level:"green",  school:"normal" }
   },
   tomorrow: {
-    Kasaragod:{ level:"white",    school:"normal" },
-    Kannur:{ level:"white", school:"normal" },
-    Wayanad:{ level:"white",    school:"normal" },
-    Kozhikode:{ level:"white", school:"normal" },
-    Malappuram:{ level:"white", school:"normal" },
+    Kasaragod:{ level:"yellow", school:"normal" },
+    Kannur:{ level:"yellow", school:"normal" },
+    Wayanad:{ level:"orange", school:"normal" },
+    Kozhikode:{ level:"green",  school:"normal" },
+    Malappuram:{ level:"yellow", school:"normal" },
     Palakkad:{ level:"white",  school:"normal" },
-    Thrissur:{ level:"white", school:"normal" },
-    Ernakulam:{ level:"white", school:"normal" },
+    Thrissur:{ level:"green",  school:"normal" },
+    Ernakulam:{ level:"green",  school:"normal" },
     Alappuzha:{ level:"white",  school:"normal" },
-    Pathanamthitta:{ level:"white", school:"normal" },
+    Pathanamthitta:{ level:"green",  school:"normal" },
     Kottayam:{ level:"white",  school:"normal" },
-    Idukki:{ level:"white",    school:"normal" },
-    Kollam:{ level:"white", school:"normal" },
+    Idukki:{ level:"orange", school:"normal" },
+    Kollam:{ level:"green",  school:"normal" },
     Thiruvananthapuram:{ level:"white",  school:"normal" }
   }
 };
-
-const DATA = { today:{}, tomorrow:{} };
-["today","tomorrow"].forEach(day=>{
-  Object.keys(PRESETS[day]).forEach(id=>{ DATA[day][id] = { ...PRESETS[day][id] }; });
-});
-
-/* ---- manual edits auto-expire 12 hours after the edit was made,
-   then revert to white (no warning). Today and tomorrow are
-   tracked and expire independently, each counting 12 hours from
-   its own last edit. Only admin-made edits are timestamped here —
-   the presets above are unaffected and stay as coded. */
-const EDIT_KEY = "mazhaalert_edits_v3";
-const EXPIRY_MS = 12 * 60 * 60 * 1000;
-let EDITS = { today:{}, tomorrow:{} };
-
-function loadEdits(){
-  try{
-    const parsed = JSON.parse(localStorage.getItem(EDIT_KEY) || "{}");
-    EDITS = { today: parsed.today || {}, tomorrow: parsed.tomorrow || {} };
-  }catch(e){ EDITS = { today:{}, tomorrow:{} }; }
-}
-function saveEdits(){ try{ localStorage.setItem(EDIT_KEY, JSON.stringify(EDITS)); }catch(e){} }
-
-function applyEditsForDay(day){
-  let changed = false;
-  Object.keys(EDITS[day]).forEach(id=>{
-    if(!DATA[day][id]) return;
-    const e = EDITS[day][id];
-    if(Date.now() - e.updatedAt > EXPIRY_MS){
-      delete EDITS[day][id];
-      changed = true;
-      DATA[day][id].level = "white";
-      DATA[day][id].school = "normal";
-    } else {
-      DATA[day][id].level = e.level;
-      DATA[day][id].school = e.school;
-    }
-  });
-  if(changed) saveEdits();
-  return changed;
-}
-function applyAllEdits(){
-  const a = applyEditsForDay("today");
-  const b = applyEditsForDay("tomorrow");
-  return a || b;
-}
-function setEdit(day, id, level, school){
-  EDITS[day][id] = { level, school, updatedAt: Date.now() };
-  DATA[day][id].level = level;
-  DATA[day][id].school = school;
-  saveEdits();
-}
-
-loadEdits();
-applyAllEdits();
-/* re-check every few minutes so a district reverts live, without reload */
-setInterval(()=>{
-  if(applyAllEdits()){
-    repaintAll();
-    if(activeEl) openSheet(activeEl);
-  }
-}, 5 * 60 * 1000);
 
 let currentDay = "today";
 function activeData(){ return DATA[currentDay]; }
@@ -944,8 +767,8 @@ const LEVEL_META = {
 const SCHOOL_META = {
   normal:  { label:"സ്കൂളുകൾ പതിവ് പോലെ പ്രവർത്തിക്കുന്നു",        chip:"off"   },
   holiday: { label:"സ്കൂളുകൾക്ക് അവധി",                              chip:"on"    },
-  camp:    { label:"ദുരിതാശ്വാസ ക്യാമ്പായി പ്രവർത്തിക്കുന്ന സ്കൂളുകൾക് അവധി", chip:"camp"  },
-  taluk:   { label:"താലൂക്ക് തല അവധി",       chip:"taluk" }
+  camp:    { label:"സ്കൂൾ ദുരിതാശ്വാസ ക്യാമ്പായി പ്രവർത്തിക്കുന്നു", chip:"camp"  },
+  taluk:   { label:"താലൂക്ക് അടിസ്ഥാനത്തിൽ സ്കൂളുകൾക്ക് അവധി",       chip:"taluk" }
 };
 
 /* ---------- paint the map ---------- */
@@ -1014,83 +837,6 @@ const backdrop   = document.getElementById("backdrop");
 const sheet      = document.getElementById("sheet");
 const sheetClose = document.getElementById("sheetClose");
 let activeEl = null;
-let adminMode = false;
-
-/* ---------- hidden admin unlock ----------
-   Tap the app title 5 times quickly to bring up a PIN pad.
-   No visible button — works the same with touch or a mouse.
-   Change ADMIN_PIN below to whatever you like. */
-const ADMIN_PIN = "2468";
-const titleTap   = document.getElementById("titleTap");
-const pinBackdrop = document.getElementById("pinBackdrop");
-const pinModal   = document.getElementById("pinModal");
-const pinInput   = document.getElementById("pinInput");
-const pinError   = document.getElementById("pinError");
-
-let tapCount = 0;
-let tapTimer = null;
-titleTap.addEventListener("click", ()=>{
-  tapCount += 1;
-  clearTimeout(tapTimer);
-  tapTimer = setTimeout(()=>{ tapCount = 0; }, 1200);
-  if(tapCount >= 5){
-    tapCount = 0;
-    if(adminMode){
-      adminMode = false;
-      document.getElementById("editPanel").style.display = "none";
-    } else {
-      openPinModal();
-    }
-  }
-});
-
-function openPinModal(){
-  pinError.classList.remove("show");
-  pinInput.value = "";
-  pinBackdrop.classList.add("show");
-  pinModal.classList.add("show");
-  pinModal.setAttribute("aria-hidden","false");
-  setTimeout(()=>pinInput.focus(), 150);
-}
-function closePinModal(){
-  pinBackdrop.classList.remove("show");
-  pinModal.classList.remove("show");
-  pinModal.setAttribute("aria-hidden","true");
-}
-function tryPin(){
-  if(pinInput.value === ADMIN_PIN){
-    adminMode = true;
-    closePinModal();
-    if(activeEl) document.getElementById("editPanel").style.display = "block";
-  } else {
-    pinError.classList.add("show");
-    pinInput.value = "";
-    pinInput.focus();
-  }
-}
-document.getElementById("pinConfirm").addEventListener("click", tryPin);
-document.getElementById("pinCancel").addEventListener("click", closePinModal);
-pinBackdrop.addEventListener("click", closePinModal);
-pinInput.addEventListener("keydown", e=>{ if(e.key === "Enter") tryPin(); });
-
-document.getElementById("levelPicker").addEventListener("click", e=>{
-  const chip = e.target.closest(".level-chip");
-  if(!chip || !activeEl) return;
-  const id = activeEl.id;
-  const d = activeData()[id];
-  setEdit(currentDay, id, chip.dataset.level, d.school);
-  repaintDistrict(id);
-  openSheet(activeEl);
-});
-
-document.getElementById("schoolPicker").addEventListener("click", e=>{
-  const chip = e.target.closest(".level-chip");
-  if(!chip || !activeEl) return;
-  const id = activeEl.id;
-  const d = activeData()[id];
-  setEdit(currentDay, id, d.level, chip.dataset.school);
-  openSheet(activeEl);
-});
 
 function miniIcon(el, color){
   const wrap = document.getElementById("miniShapeWrap");
@@ -1158,22 +904,6 @@ function openSheet(el){
 
   miniIcon(el, computedColor);
 
-  document.getElementById("editPanel").style.display = adminMode ? "block" : "none";
-  document.querySelectorAll("#levelPicker .level-chip").forEach(chip=>{
-    const on = chip.dataset.level === d.level;
-    chip.classList.toggle("selected", on);
-    chip.style.color = on
-      ? getComputedStyle(document.documentElement).getPropertyValue("--lvl-"+chip.dataset.level).trim()
-      : "";
-  });
-  document.querySelectorAll("#schoolPicker .level-chip").forEach(chip=>{
-    const on = chip.dataset.school === d.school;
-    chip.classList.toggle("selected", on);
-    chip.style.color = on
-      ? getComputedStyle(document.documentElement).getPropertyValue("--sch-"+chip.dataset.school).trim()
-      : "";
-  });
-
   backdrop.classList.add("show");
   sheet.classList.add("show");
   sheet.setAttribute("aria-hidden","false");
@@ -1220,8 +950,9 @@ handle.addEventListener("touchend", e=>onEnd(e.changedTouches[0].clientY));
 /* ---------- ad click-through links ----------
    Edit these two URLs to wherever each ad image should lead.
    The whole image area is tappable, with no visible link styling. */
-const AD_LINK_SPLASH = "https://example.com";
-const AD_LINK_BOTTOM = "https://example.com";
+const AD_ENQUIRY_MAILTO = "mailto:hello@mazhaalert.in?subject=" + encodeURIComponent("പരസ്യം നൽകാൻ താല്പര്യമുണ്ട് — Mazha Alert");
+const AD_LINK_SPLASH = AD_ENQUIRY_MAILTO;
+const AD_LINK_BOTTOM = AD_ENQUIRY_MAILTO;
 document.getElementById("splashAdLink").href = AD_LINK_SPLASH;
 document.getElementById("bottomAdLink").href = AD_LINK_BOTTOM;
 
