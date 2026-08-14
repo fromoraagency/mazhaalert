@@ -960,7 +960,7 @@ handle.addEventListener("touchend", e=>onEnd(e.changedTouches[0].clientY));
    The whole image area is tappable, with no visible link styling. */
 const AD_ENQUIRY_MAILTO = "mailto:fromora.agency@gmail.com?subject=" + encodeURIComponent("പരസ്യം നൽകാൻ താല്പര്യമുണ്ട് — Mazha Alert");
 const AD_LINK_SPLASH = AD_ENQUIRY_MAILTO;
-const AD_LINK_BOTTOM = "https://milma.com/";
+const AD_LINK_BOTTOM = AD_ENQUIRY_MAILTO;
 document.getElementById("splashAdLink").href = AD_LINK_SPLASH;
 document.getElementById("bottomAdLink").href = AD_LINK_BOTTOM;
 
