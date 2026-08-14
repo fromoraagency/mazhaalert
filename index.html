@@ -704,45 +704,43 @@ svg.mini-shape{ width:100%; height:100%; }
    school: "normal" | "holiday" | "camp" | "taluk"
    ============================================================ */
 const COLLECTORS = {
-Kasaragod:"അർജുൻ പാണ്ഡ്യൻ, IAS", Kannur:"വിഷ്ണുരാജ് പി, IAS", Wayanad:"Dr.മേഘശ്രീ, IAS",
-   Kozhikode:"മാധവിക്കുട്ടി എം.എസ്, IAS", Malappuram:"Dr.വിനയ് ഗോയൽ, IAS", Palakkad:"കെ. സുധീർ, IAS", 
-   Thrissur:"ശിഖ സുരേന്ദ്രൻ, IAS", Ernakulam:"പ്രിയങ്ക ജി, IAS", Alappuzha:"ഷാജി വി. നായർ, IAS", 
-   Pathanamthitta:"നിസാമുദ്ദീൻ, IAS", Kottayam:"ചേതൻ കുമാർ മീന, IAS", Idukki:"Dr.ദിനേശൻ ചെറുവോട്ട്, IAS",
-   Kollam:"ആനി ജൂല തോമസ്, IAS", Thiruvananthapuram:"അനു കുമാരി, IAS"
+  Kasaragod:"", Kannur:"", Wayanad:"", Kozhikode:"", Malappuram:"", Palakkad:"",
+  Thrissur:"", Ernakulam:"", Alappuzha:"", Pathanamthitta:"", Kottayam:"",
+  Idukki:"", Kollam:"", Thiruvananthapuram:""
 };
 
 const DATA = {
- today: {today: {
-    Kasaragod:{ level:"green", school:"normal" },
-    Kannur:{ level:"green", school:"normal" },
-    Wayanad:{ level:"green", school:"normal" },
-    Kozhikode:{ level:"green", school:"normal" },
-    Malappuram:{ level:"green", school:"normal" },
-    Palakkad:{ level:"green", school:"normal" },
-    Thrissur:{ level:"green", school:"normal" },
-    Ernakulam:{ level:"green", school:"normal" },
-    Alappuzha:{ level:"green", school:"normal" },
-    Pathanamthitta:{ level:"green", school:"normal" },
-    Kottayam:{ level:"green", school:"normal" },
-    Idukki:{ level:"green", school:"normal" },
-    Kollam:{ level:"green", school:"normal" },
-    Thiruvananthapuram:{ level:"green", school:"normal" },
+  today: {
+    Kasaragod:{ level:"red",    school:"holiday" },
+    Kannur:{ level:"orange", school:"normal" },
+    Wayanad:{ level:"red",    school:"holiday" },
+    Kozhikode:{ level:"yellow", school:"normal" },
+    Malappuram:{ level:"orange", school:"normal" },
+    Palakkad:{ level:"green",  school:"normal" },
+    Thrissur:{ level:"yellow", school:"normal" },
+    Ernakulam:{ level:"orange", school:"normal" },
+    Alappuzha:{ level:"green",  school:"normal" },
+    Pathanamthitta:{ level:"yellow", school:"normal" },
+    Kottayam:{ level:"green",  school:"normal" },
+    Idukki:{ level:"red",    school:"holiday" },
+    Kollam:{ level:"yellow", school:"normal" },
+    Thiruvananthapuram:{ level:"green",  school:"normal" }
   },
   tomorrow: {
-    Kasaragod:{ level:"green", school:"normal" },
-    Kannur:{ level:"green", school:"normal" },
-    Wayanad:{ level:"green", school:"normal" },
-    Kozhikode:{ level:"green", school:"normal" },
-    Malappuram:{ level:"green", school:"normal" },
-    Palakkad:{ level:"green", school:"normal" },
-    Thrissur:{ level:"green", school:"normal" },
-    Ernakulam:{ level:"green", school:"normal" },
-    Alappuzha:{ level:"green", school:"normal" },
-    Pathanamthitta:{ level:"green", school:"normal" },
-    Kottayam:{ level:"green", school:"normal" },
-    Idukki:{ level:"green", school:"normal" },
-    Kollam:{ level:"green", school:"normal" },
-    Thiruvananthapuram:{ level:"green", school:"normal" },
+    Kasaragod:{ level:"yellow", school:"normal" },
+    Kannur:{ level:"yellow", school:"normal" },
+    Wayanad:{ level:"orange", school:"normal" },
+    Kozhikode:{ level:"green",  school:"normal" },
+    Malappuram:{ level:"yellow", school:"normal" },
+    Palakkad:{ level:"white",  school:"normal" },
+    Thrissur:{ level:"green",  school:"normal" },
+    Ernakulam:{ level:"green",  school:"normal" },
+    Alappuzha:{ level:"white",  school:"normal" },
+    Pathanamthitta:{ level:"green",  school:"normal" },
+    Kottayam:{ level:"white",  school:"normal" },
+    Idukki:{ level:"orange", school:"normal" },
+    Kollam:{ level:"green",  school:"normal" },
+    Thiruvananthapuram:{ level:"white",  school:"normal" }
   }
 };
 
